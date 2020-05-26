@@ -7,7 +7,10 @@
 		{
 			"Name": "vox_and_beyond",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine"
+			]
 		}
 	]
 }
