@@ -2,6 +2,7 @@
 
 #include "../Public/UserPawn.h"
 #include "../Public/basePrimitive.h"
+#include <functional>
 
 // Sets default values
 AUserPawn::AUserPawn()
