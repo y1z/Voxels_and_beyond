@@ -2,7 +2,9 @@
 
 // #include "basePrimitive.h"
 #include "../Public/basePrimitive.h"
-
+#include "UserPawn.h"
+#include "Engine/StaticMesh.h"
+#include <filesystem>
 
 
 FString AbasePrimitive::s_cubeMeshPath = 
@@ -10,7 +12,11 @@ FString AbasePrimitive::s_cubeMeshPath =
 
 FString AbasePrimitive::s_sphereMeshPath =
 (TEXT("/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere"));
-// Sets default values
+ConstructorHelpers::FObjectFinder<UStaticMesh>* AbasePrimitive::s_cubeMesh = nullptr;
+ConstructorHelpers::FObjectFinder<UStaticMesh>* AbasePrimitive::s_sphereMesh = nullptr;
+ConstructorHelpers::FObjectFinder<UStaticMesh>* AbasePrimitive::s_pyramidMesh = nullptr;
+
+
 AbasePrimitive::AbasePrimitive()
 		: m_pMesh(nullptr),
 			m_selectedShape(PrimitiveShape::cube),
@@ -21,20 +27,28 @@ AbasePrimitive::AbasePrimitive()
 	m_pMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Primitive")); 
 	m_pMesh->SetupAttachment(RootComponent);
 
-	//changeShape(m_selectedShape);
-  static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeVisualAssetStart(*s_cubeMeshPath);
+  auto regularGetPath = FPaths::GetPath(s_sphereMeshPath);
+  auto currentFilePath = std::filesystem::current_path();
+  FString temp(FPaths::RootDir());
+  FString relativePath(TEXT("/Game/StarterContent/Shapes/Shape_Cube.Shape_Cube"));
 
-      if( CubeVisualAssetStart.Succeeded() )
-      {
-        m_pMesh->SetStaticMesh(CubeVisualAssetStart.Object);
-        //m_pMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
-      }
+  static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeVisualAssetStart(*s_cubeMeshPath);
+  static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereVisualAssetStart(*s_sphereMeshPath);
+  s_cubeMesh = &CubeVisualAssetStart;
+  s_sphereMesh = &SphereVisualAssetStart;
+
+  if( s_sphereMesh->Succeeded() )
+  {
+    m_pMesh->SetStaticMesh(CubeVisualAssetStart.Object);
+    //m_pMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
+  }
 }
 
 // Called when the game starts or when spawned
 void AbasePrimitive::BeginPlay()
 {
 	Super::BeginPlay();
+
 }
 
 // Called every frame
@@ -49,22 +63,22 @@ void AbasePrimitive::changeShape(PrimitiveShape shape)
 	{
     case PrimitiveShape::cube:
     {
-      static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeVisualAsset(*s_cubeMeshPath);
+      //static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeVisualAsset(*s_cubeMeshPath);
 
-      if( CubeVisualAsset.Succeeded() )
+      if( s_cubeMesh->Succeeded() )
       {
-        m_pMesh->SetStaticMesh(CubeVisualAsset.Object);
+        m_pMesh->SetStaticMesh(s_cubeMesh->Object);
         //m_pMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
       }
     }
 	break;
     case PrimitiveShape::sphere:
     {
-      static ConstructorHelpers::FObjectFinder<UStaticMesh> VisualAsset(*s_sphereMeshPath);
+      //static ConstructorHelpers::FObjectFinder<UStaticMesh> VisualAsset(*s_sphereMeshPath);
 
-      if( VisualAsset.Succeeded() )
+      if(s_sphereMesh->Succeeded() )
       {
-        m_pMesh->SetStaticMesh(VisualAsset.Object);
+        m_pMesh->SetStaticMesh(s_sphereMesh->Object);
         //m_pMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
       }
 
@@ -82,22 +96,23 @@ bool AbasePrimitive::tempChangeShape(int i)
 	{
     case 0:
     {
-      ConstructorHelpers::FObjectFinder<UStaticMesh> CubeVisualAsset(*s_cubeMeshPath);
+     /// static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeVisualAsset(*s_cubeMeshPath);
 
-      if( CubeVisualAsset.Succeeded() )
+
+      if( s_cubeMesh->Succeeded() )
       {
-        m_pMesh->SetStaticMesh(CubeVisualAsset.Object);
+        m_pMesh->SetStaticMesh(s_cubeMesh->Object);
         //m_pMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
       }
     }
 	break;
     case 1:
     {
-      ConstructorHelpers::FObjectFinder<UStaticMesh> VisualAsset(*s_sphereMeshPath);
+     /// static ConstructorHelpers::FObjectFinder<UStaticMesh> VisualAsset(*s_sphereMeshPath);
 
-      if( VisualAsset.Succeeded() )
+      if(s_sphereMesh->Succeeded() )
       {
-        m_pMesh->SetStaticMesh(VisualAsset.Object);
+        m_pMesh->SetStaticMesh(s_sphereMesh->Object);
         //m_pMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
       }
 

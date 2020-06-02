@@ -3,6 +3,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Misc/Paths.h"
+#include "UObject/ConstructorHelpers.h"
+
 #include <memory>
 
 #include "basePrimitive.generated.h"
@@ -15,14 +18,6 @@ enum class PrimitiveShape : uint8
 
 };
 
-class PossibleShapes
-{
-public:
-  std::unique_ptr<UStaticMesh> m_cubeMesh = nullptr;
-  std::unique_ptr<UStaticMesh> m_sphereMesh = nullptr;
-  std::unique_ptr<UStaticMesh> m_pyramidMesh = nullptr;
-  
-};
 
 UCLASS(Blueprintable)
 class VOX_AND_BEYOND_API AbasePrimitive : public AActor
@@ -53,12 +48,16 @@ protected:
 	static FString s_cubeMeshPath;
 	static FString s_sphereMeshPath;
 
+  static ConstructorHelpers::FObjectFinder<UStaticMesh>* s_cubeMesh;
+
+  static ConstructorHelpers::FObjectFinder<UStaticMesh>* s_sphereMesh;
+
+  static ConstructorHelpers::FObjectFinder<UStaticMesh>* s_pyramidMesh;
 	
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
