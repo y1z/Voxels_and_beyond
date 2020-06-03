@@ -52,15 +52,13 @@ void AGrid3D::Tick(float DeltaTime)
 bool
 AGrid3D::addPrimitiveToGrid(AbasePrimitive* primitive)
 {
-  if( m_primitiveLimitAmount >= m_count )
-  {
     m_primitives.push_back(primitive);
     ++m_count;
     return true;
-  }
 
-  return false;
 }
+
+
 
 AbasePrimitive*
 AGrid3D::GetPrimitive(int64 index)
@@ -70,5 +68,12 @@ AGrid3D::GetPrimitive(int64 index)
     return m_primitives.at(index);
   }
   return nullptr;
+}
+
+void 
+AGrid3D::TransFormPrimitive(int64 index)
+{
+  
+    m_primitives.at(index)->m_pMesh->SetRelativeLocation(m_topLeftPosition);
 }
 

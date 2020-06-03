@@ -36,6 +36,10 @@ public:
   AbasePrimitive*
 	GetPrimitive(int64 index);
 
+	UFUNCTION(BlueprintCallable)
+  void
+  TransFormPrimitive(int64 index);
+
 
 public:
   /**
