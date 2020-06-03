@@ -15,7 +15,8 @@ enum class PrimitiveShape : uint8
 {
 	cube UMETA(DisplayName = "cube shape"),
 	sphere UMETA(DisplayName = "sphere shape"),
-
+  pyramid UMETA(DisplayName = "sphere pyramid"),
+	quadPyramid UMETA(DisplayName = "sphere quadPyramid"),
 };
 
 
@@ -33,9 +34,6 @@ public:
 	void changeShape(PrimitiveShape shape);
 
 
-	UFUNCTION(BlueprintCallable)
-	bool tempChangeShape(int shape);
-
 protected:
 	UPROPERTY(VisibleAnywhere)
 	PrimitiveShape m_selectedShape;
@@ -46,6 +44,7 @@ public:
 
 protected:
 	static FString s_cubeMeshPath;
+
 	static FString s_sphereMeshPath;
 
   static ConstructorHelpers::FObjectFinder<UStaticMesh>* s_cubeMesh;
@@ -62,3 +61,4 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 };
+
