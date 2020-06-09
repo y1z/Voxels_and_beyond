@@ -6,8 +6,6 @@
 #include "Misc/Paths.h"
 #include "UObject/ConstructorHelpers.h"
 
-#include <memory>
-
 #include "basePrimitive.generated.h"
 
 UENUM(BlueprintType)
@@ -27,20 +25,57 @@ class VOX_AND_BEYOND_API AbasePrimitive : public AActor
 public:
 	// Sets default values for this actor's properties
 	AbasePrimitive();
-	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent *m_pMesh;
 
 	UFUNCTION(BlueprintCallable)
 	void changeShape(PrimitiveShape shape);
 
+	UFUNCTION(BlueprintCallable)
+	bool SetColor(FColor color);
+
+
+private:
+
+	TCHAR* getMaterialColorName() const
+	{
+	  return TEXT("JustColor");
+	}
+
+  /**
+  * @brief Initializes the dynamic material instance.
+  * @bug no known bugs.
+  */
+	bool 
+  initMaterialInstanceDynamic();
+
+public:// variables
+
+  /**
+  * @brief The name of the Material used to color the primitive.
+  */
+	UPROPERTY(VisibleAnywhere)
+	FName m_nameOfmat;
+
+  /**
+  * @brief The name static mesh used to visualize the primitive
+  */
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent *m_pMesh;
+
+
+  /**
+  * @brief The material used to color the primitive.
+  */
+  UPROPERTY(EditAnywhere)
+  UMaterialInstanceDynamic* m_pMaterialDynamic;
+private:  
+public:
+	UPROPERTY(EditAnywhere)
+  FLinearColor m_color;
 
 protected:
 	UPROPERTY(VisibleAnywhere)
 	PrimitiveShape m_selectedShape;
 
-public:
-	UPROPERTY(EditAnywhere)
-	FColor m_color;
 
 protected:
 	static FString s_cubeMeshPath;
@@ -53,7 +88,6 @@ protected:
 
   static ConstructorHelpers::FObjectFinder<UStaticMesh>* s_pyramidMesh;
 	
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

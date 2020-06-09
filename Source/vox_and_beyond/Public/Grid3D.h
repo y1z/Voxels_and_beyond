@@ -62,6 +62,21 @@ public:
 
 private:
   /**
+  * @brief The difference Between 2 elements in the X-Axis.
+  */
+  float m_deltaWidth;
+
+  /**
+  * @brief The difference Between 2 elements in the Z-Axis.(because this is unreal engine)
+  */
+  float m_heightWidth;
+
+  /**
+  * @brief The difference Between 2 elements in the Y-Axis.(because this is unreal engine)
+  */
+  float m_DepthWidth;
+
+  /**
   * @brief for visualizing the mesh.
   */
 	UPROPERTY(VisibleAnywhere)
@@ -83,9 +98,6 @@ public:
 	UPROPERTY(EditAnywhere)
 	FVector m_topLeftPosition;
 
-
-	//UPROPERTY(VisibleAnywhere)
-	std::vector<AbasePrimitive* > m_primitives;
-
-
+  UPROPERTY(VisibleAnywhere)
+  TArray<AbasePrimitive*> m_primitives;
 };
