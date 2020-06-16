@@ -3,21 +3,15 @@
 #include "basePrimitive.h"
 #include "Engine/StaticMesh.h"
 
-
-FString AbasePrimitive::s_cubeMeshPath =
-TEXT("/Game/StarterContent/Shapes/Shape_Cube.Shape_Cube");
-
-FString AbasePrimitive::s_sphereMeshPath =
-TEXT("/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere");
-
 ConstructorHelpers::FObjectFinder<UStaticMesh>* AbasePrimitive::s_cubeMesh = nullptr;
 ConstructorHelpers::FObjectFinder<UStaticMesh>* AbasePrimitive::s_sphereMesh = nullptr;
 ConstructorHelpers::FObjectFinder<UStaticMesh>* AbasePrimitive::s_pyramidMesh = nullptr;
+ConstructorHelpers::FObjectFinder<UStaticMesh>* AbasePrimitive::s_pyramidQuadMesh = nullptr;
 
 
 AbasePrimitive::AbasePrimitive()
   :
-  m_nameOfmat(TEXT("")),
+  m_nameOfColorMat(TEXT("")),
   m_pMesh(nullptr),
   m_pMaterialDynamic(nullptr),
   m_selectedShape(PrimitiveShape::cube),
@@ -30,18 +24,26 @@ AbasePrimitive::AbasePrimitive()
 
 
   static ConstructorHelpers::FObjectFinder<UStaticMesh>
-  CubeVisualAssetStart(TEXT("/Game/StarterContent/Shapes/Shape_Cube.Shape_Cube"));
+  CubeVisual(TEXT("/Game/StarterContent/Shapes/Shape_Cube.Shape_Cube"));
 
   static ConstructorHelpers::FObjectFinder<UStaticMesh> 
-  SphereVisualAssetStart(TEXT("/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere"));
+  SphereVisual(TEXT("/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere"));
 
-  s_cubeMesh = &CubeVisualAssetStart;
-  s_sphereMesh = &SphereVisualAssetStart;
+  static ConstructorHelpers::FObjectFinder<UStaticMesh>
+  PyramidVisual(TEXT("/Game/StarterContent/Shapes/Shape_TriPyramid.Shape_TriPyramid"));
+
+  static ConstructorHelpers::FObjectFinder<UStaticMesh>
+  PyramidQuadVisual(TEXT("/Game/StarterContent/Shapes/Shape_QuadPyramid.Shape_QuadPyramid"));
+
+
+  s_cubeMesh = &CubeVisual;
+  s_sphereMesh = &SphereVisual;
+  s_pyramidMesh = &PyramidVisual;
+  s_pyramidQuadMesh = &PyramidQuadVisual;
 
   if( s_sphereMesh->Succeeded() )
   {
     m_pMesh->SetStaticMesh(s_sphereMesh->Object);
-    //m_pMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
   }
 }
 
@@ -52,13 +54,9 @@ void AbasePrimitive::BeginPlay()
 
   if( initMaterialInstanceDynamic() )
   {
-    m_pMaterialDynamic->SetVectorParameterValue(m_nameOfmat, FColor(250, 0, 0));
+    m_pMaterialDynamic->SetVectorParameterValue(m_nameOfColorMat,
+                                                FColor(250, 0, 0));
   }
-  //if( this->initMaterialInstanceDynamic() )
-  //{
-  //  TArray<FMaterialParameterInfo> paramInfo;
-  //  TArray<FGuid> OutParameterIds;
-  //}
 }
 
 
@@ -72,32 +70,47 @@ void AbasePrimitive::changeShape(PrimitiveShape shape)
 {
   switch( shape )
   {
+
     case PrimitiveShape::cube:
     {
-      //static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeVisualAsset(*s_cubeMeshPath);
-
       if( s_cubeMesh->Succeeded() )
       {
         m_pMesh->SetStaticMesh(s_cubeMesh->Object);
-        //m_pMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
       }
     }
     break;
+
     case PrimitiveShape::sphere:
     {
-      //static ConstructorHelpers::FObjectFinder<UStaticMesh> VisualAsset(*s_sphereMeshPath);
-
       if( s_sphereMesh->Succeeded() )
       {
         m_pMesh->SetStaticMesh(s_sphereMesh->Object);
-        //m_pMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
       }
-
     }
+    break;
+
+    case PrimitiveShape::pyramid:
+    {
+      if( s_pyramidMesh->Succeeded() )
+      {
+        m_pMesh->SetStaticMesh(s_pyramidMesh->Object);
+      }
+    }
+    break;
+
+    case PrimitiveShape::quadPyramid:
+    {
+      if( s_pyramidQuadMesh->Succeeded() )
+      {
+        m_pMesh->SetStaticMesh(s_pyramidQuadMesh->Object);
+      }
+    }
+    break;
 
     default:
     break;
   }
+
 }
 
 bool 
@@ -106,7 +119,7 @@ AbasePrimitive::SetColor(FColor color)
 
   if( m_pMaterialDynamic != nullptr )
   {
-    m_pMaterialDynamic->SetVectorParameterValue(m_nameOfmat, color);
+    m_pMaterialDynamic->SetVectorParameterValue(m_nameOfColorMat, color);
     return true;
   }
 
@@ -134,16 +147,15 @@ AbasePrimitive::initMaterialInstanceDynamic()
     TArray<FMaterialParameterInfo> OutParameterInfo;
     TArray<FGuid> OutParameterIds;
     m_pMesh->GetMaterial(0)->GetAllVectorParameterInfo(OutParameterInfo, OutParameterIds);
-    //m_pMaterialDynamic->GetAllVectorParameterInfo(OutParameterInfo, OutParameterIds);
+
     if( OutParameterInfo.Num() != 0 )
     {
-      m_nameOfmat = OutParameterInfo[0].Name;
+      m_nameOfColorMat = OutParameterInfo[0].Name;
 
       return true;
     }
   }
 
   return false;
-
 }
 

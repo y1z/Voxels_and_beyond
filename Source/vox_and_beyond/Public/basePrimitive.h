@@ -56,7 +56,7 @@ public:// variables
   * @brief The name of the Material used to color the primitive.
   */
 	UPROPERTY(VisibleAnywhere)
-	FName m_nameOfmat;
+	FName m_nameOfColorMat;
 
   /**
   * @brief The name static mesh used to visualize the primitive
@@ -80,11 +80,7 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	PrimitiveShape m_selectedShape;
 
-
 protected:
-	static FString s_cubeMeshPath;
-
-	static FString s_sphereMeshPath;
 
   /**
   * @brief A pointer to a cube mesh

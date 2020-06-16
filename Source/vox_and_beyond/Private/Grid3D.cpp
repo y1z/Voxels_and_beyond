@@ -49,7 +49,6 @@ void AGrid3D::BeginPlay()
 
   m_pMesh->SetWorldLocation(FVector(0,0,0));
   m_pMesh->SetRelativeScale3D(FVector(m_width, m_depth, m_height));
-  //m_pMesh->MoveComponent()
 
   auto bounds = m_pMesh->CalcBounds(m_pMesh->GetRelativeTransform());
   m_topLeftPosition = bounds.GetBox().Max;
@@ -74,7 +73,7 @@ void AGrid3D::BeginPlay()
 
       tempPtr->m_pMesh->SetWorldTransform(transformForGridPosition);
 
-      tempPtr->SetColor(FColor(224, 189,150,110));
+      tempPtr->SetColor(FColor(224, 189,150,255));
       tempPtr->changeShape(PrimitiveShape::cube);
       m_primitives.Add(tempPtr);
     }
