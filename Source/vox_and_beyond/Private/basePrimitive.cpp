@@ -5,10 +5,10 @@
 
 
 FString AbasePrimitive::s_cubeMeshPath =
-(TEXT("/Game/StarterContent/Shapes/Shape_Cube.Shape_Cube"));
+TEXT("/Game/StarterContent/Shapes/Shape_Cube.Shape_Cube");
 
 FString AbasePrimitive::s_sphereMeshPath =
-(TEXT("/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere"));
+TEXT("/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere");
 
 ConstructorHelpers::FObjectFinder<UStaticMesh>* AbasePrimitive::s_cubeMesh = nullptr;
 ConstructorHelpers::FObjectFinder<UStaticMesh>* AbasePrimitive::s_sphereMesh = nullptr;
@@ -28,8 +28,12 @@ AbasePrimitive::AbasePrimitive()
   m_pMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Primitive"));
   m_pMesh->SetupAttachment(RootComponent);
 
-  static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeVisualAssetStart(*s_cubeMeshPath);
-  static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereVisualAssetStart(*s_sphereMeshPath);
+
+  static ConstructorHelpers::FObjectFinder<UStaticMesh>
+  CubeVisualAssetStart(TEXT("/Game/StarterContent/Shapes/Shape_Cube.Shape_Cube"));
+
+  static ConstructorHelpers::FObjectFinder<UStaticMesh> 
+  SphereVisualAssetStart(TEXT("/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere"));
 
   s_cubeMesh = &CubeVisualAssetStart;
   s_sphereMesh = &SphereVisualAssetStart;
@@ -45,12 +49,6 @@ AbasePrimitive::AbasePrimitive()
 void AbasePrimitive::BeginPlay()
 {
   Super::BeginPlay();
-  m_color.R = FLinearColor::Red.R;
-  m_color.B = FLinearColor::Green.B;
-  m_color.G = FLinearColor::Green.G;
-  m_color.A = FLinearColor::Green.A;
-
-
 
   if( initMaterialInstanceDynamic() )
   {
@@ -62,9 +60,6 @@ void AbasePrimitive::BeginPlay()
   //  TArray<FGuid> OutParameterIds;
   //}
 }
-
-
-
 
 
 // Called every frame
@@ -116,6 +111,15 @@ AbasePrimitive::SetColor(FColor color)
   }
 
   return false;
+}
+
+float 
+AbasePrimitive::getHeight() const
+{
+  auto Top = m_pMesh->CalcBounds(m_pMesh->GetRelativeTransform()).GetBox().Max;
+  auto buttom = m_pMesh->CalcBounds(m_pMesh->GetRelativeTransform()).GetBox().Min;
+
+ return std::fabsf(Top.Z - buttom.Z);
 }
 
 bool

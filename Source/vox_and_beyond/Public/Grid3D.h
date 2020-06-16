@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "basePrimitive.h"
-#include <vector>
+#include "UObject/ConstructorHelpers.h"
 #include "Grid3D.generated.h"
 
   //auto bounds = m_pMesh->CalcBounds(m_pMesh->GetRelativeTransform());
@@ -40,6 +40,15 @@ public:
   void
   TransFormPrimitive(int64 index);
 
+  // TODO : ADD COLOR PARAM
+	UFUNCTION(BlueprintCallable)
+  AbasePrimitive*
+  SpwanInGrid(FVector point);
+
+private:
+
+  void//between
+  calculateSizeBetweenCubes();
 
 public:
   /**
@@ -69,18 +78,20 @@ private:
   /**
   * @brief The difference Between 2 elements in the Z-Axis.(because this is unreal engine)
   */
-  float m_heightWidth;
+  float m_deltaHeight;
 
   /**
   * @brief The difference Between 2 elements in the Y-Axis.(because this is unreal engine)
   */
-  float m_DepthWidth;
+  float m_deltaDepth;
 
   /**
   * @brief for visualizing the mesh.
   */
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent *m_pMesh;
+
+  static ConstructorHelpers::FObjectFinder<UStaticMesh>* s_pointerToMesh;
 
   /**
   * @brief keeps track of how many primitive the grid has.
@@ -97,6 +108,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	FVector m_topLeftPosition;
+
+	UPROPERTY(EditAnywhere)
+  FVector m_buttomRightPostion;
 
   UPROPERTY(VisibleAnywhere)
   TArray<AbasePrimitive*> m_primitives;

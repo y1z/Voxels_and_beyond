@@ -32,6 +32,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool SetColor(FColor color);
 
+	UFUNCTION(BlueprintCallable)
+	float getHeight()const;
+
 
 private:
 
@@ -59,7 +62,8 @@ public:// variables
   * @brief The name static mesh used to visualize the primitive
   */
 	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent *m_pMesh;
+  UStaticMeshComponent* m_pMesh;
+  
 
 
   /**
@@ -70,7 +74,7 @@ public:// variables
 private:  
 public:
 	UPROPERTY(EditAnywhere)
-  FLinearColor m_color;
+  FColor m_color;
 
 protected:
 	UPROPERTY(VisibleAnywhere)
@@ -82,11 +86,25 @@ protected:
 
 	static FString s_sphereMeshPath;
 
+  /**
+  * @brief A pointer to a cube mesh
+  */
   static ConstructorHelpers::FObjectFinder<UStaticMesh>* s_cubeMesh;
 
+  /**
+  * @brief A pointer to a sphere mesh. 
+  */
   static ConstructorHelpers::FObjectFinder<UStaticMesh>* s_sphereMesh;
 
+  /**
+  * @brief A pointer to a pyramid mesh. 
+  */
   static ConstructorHelpers::FObjectFinder<UStaticMesh>* s_pyramidMesh;
+
+  /**
+  * @brief A pointer to a pyramid quad mesh. 
+  */
+  static ConstructorHelpers::FObjectFinder<UStaticMesh>* s_pyramidQuadMesh;
 	
 protected:
 	// Called when the game starts or when spawned
