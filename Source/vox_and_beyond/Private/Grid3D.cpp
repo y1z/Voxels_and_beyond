@@ -103,6 +103,7 @@ AGrid3D::addPrimitiveToGrid(AbasePrimitive* primitive)
   if( m_count < m_primitiveLimitAmount )
   {
     m_primitives.Add(primitive);
+    m_primitives.Sort();
     ++m_count;
     return true;
   }
@@ -145,6 +146,7 @@ AGrid3D::SpwanInGrid(FVector point)
     tempPtr->SetColor(FColor::Cyan);
 
     m_primitives.Add(tempPtr);
+    m_primitives.Sort();
     return tempPtr;
     
   }

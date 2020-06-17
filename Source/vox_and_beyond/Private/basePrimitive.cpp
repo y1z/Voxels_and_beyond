@@ -47,6 +47,22 @@ AbasePrimitive::AbasePrimitive()
   }
 }
 
+bool
+AbasePrimitive::operator<(AbasePrimitive const &other) const
+{
+  FVector const locationOfMe = this->m_pMesh->GetRelativeLocation();
+  FVector const locationOfOther = other.m_pMesh->GetRelativeLocation();
+
+  return (FVector::ZeroVector - locationOfMe).SizeSquared() < (FVector::ZeroVector-locationOfOther).SizeSquared();
+}
+
+bool
+AbasePrimitive::operator>(AbasePrimitive const &other) const
+{
+  return !(*this < other);
+}
+
+
 // Called when the game starts or when spawned
 void AbasePrimitive::BeginPlay()
 {

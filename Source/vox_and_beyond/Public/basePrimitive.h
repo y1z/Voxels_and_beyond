@@ -25,7 +25,16 @@ class VOX_AND_BEYOND_API AbasePrimitive : public AActor
 public:
 	// Sets default values for this actor's properties
 	AbasePrimitive();
+public: // operators 
 
+  bool 
+  operator <(AbasePrimitive const& other) const;
+
+  bool 
+  operator >(AbasePrimitive const& other) const;
+
+
+public:
 	UFUNCTION(BlueprintCallable)
 	void changeShape(PrimitiveShape shape);
 
