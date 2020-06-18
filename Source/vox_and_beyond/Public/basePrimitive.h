@@ -3,7 +3,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Misc/Paths.h"
 #include "UObject/ConstructorHelpers.h"
 
 #include "basePrimitive.generated.h"
@@ -27,20 +26,36 @@ public:
 	AbasePrimitive();
 public: // operators 
 
+  /**
+  * @brief Compares the 2 primitives distance from the coordinate (0,0,0)
+  */
   bool 
   operator <(AbasePrimitive const& other) const;
 
+  /**
+  * @brief Compares the 2 primitives distance from the coordinate (0,0,0)
+  */
   bool 
   operator >(AbasePrimitive const& other) const;
 
 
 public:
-	UFUNCTION(BlueprintCallable)
-	void changeShape(PrimitiveShape shape);
 
+  /**
+  * @brief Changes the shape of the current primitive.
+  */
 	UFUNCTION(BlueprintCallable)
-	bool SetColor(FColor color);
+	void setShape(PrimitiveShape shape);
 
+  /**
+  * @brief Changes the color of the primitive
+  */
+	UFUNCTION(BlueprintCallable)
+	bool setColor(FColor color);
+
+  /**
+  * @returns The height of the primitive 
+  */
 	UFUNCTION(BlueprintCallable)
 	float getHeight()const;
 
@@ -58,6 +73,13 @@ private:
   */
 	bool 
   initMaterialInstanceDynamic();
+	
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+public:
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
 
 public:// variables
 
@@ -110,12 +132,5 @@ protected:
   * @brief A pointer to a pyramid quad mesh. 
   */
   static ConstructorHelpers::FObjectFinder<UStaticMesh>* s_pyramidQuadMesh;
-	
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 };
 

@@ -20,7 +20,7 @@ AGrid3D::AGrid3D()
 
 {
   // Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-  PrimaryActorTick.bCanEverTick = true;
+  PrimaryActorTick.bCanEverTick = false;
   m_pMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("3D Grid"));
   m_pMesh->SetupAttachment(RootComponent);
 
@@ -73,8 +73,8 @@ void AGrid3D::BeginPlay()
 
       tempPtr->m_pMesh->SetWorldTransform(transformForGridPosition);
 
-      tempPtr->SetColor(FColor(224, 189,150,255));
-      tempPtr->changeShape(PrimitiveShape::cube);
+      tempPtr->setColor(FColor(224, 189,150,255));
+      tempPtr->setShape(PrimitiveShape::cube);
       m_primitives.Add(tempPtr);
     }
 
@@ -143,7 +143,7 @@ AGrid3D::SpwanInGrid(FVector point)
   {
     AbasePrimitive* tempPtr = GetWorld()->SpawnActor<AbasePrimitive>(spawnParam);
     tempPtr->m_pMesh->SetRelativeLocation(point);
-    tempPtr->SetColor(FColor::Cyan);
+    tempPtr->setColor(FColor::Cyan);
 
     m_primitives.Add(tempPtr);
     m_primitives.Sort();

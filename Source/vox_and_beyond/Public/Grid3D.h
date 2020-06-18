@@ -112,6 +112,6 @@ public:
 	UPROPERTY(EditAnywhere)
   FVector m_buttomRightPostion;
 
-  UPROPERTY(VisibleAnywhere)
+  UPROPERTY(EditAnywhere)
   TArray<AbasePrimitive*> m_primitives;
 };

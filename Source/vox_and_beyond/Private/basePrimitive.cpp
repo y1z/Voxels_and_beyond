@@ -14,8 +14,8 @@ AbasePrimitive::AbasePrimitive()
   m_nameOfColorMat(TEXT("")),
   m_pMesh(nullptr),
   m_pMaterialDynamic(nullptr),
-  m_selectedShape(PrimitiveShape::cube),
-  m_color(FColor(255, 0, 0))
+  m_color(FColor(255, 0, 0)),
+  m_selectedShape(PrimitiveShape::cube)
 {
   // Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
   PrimaryActorTick.bCanEverTick = true;
@@ -82,7 +82,7 @@ void AbasePrimitive::Tick(float DeltaTime)
   Super::Tick(DeltaTime);
 }
 
-void AbasePrimitive::changeShape(PrimitiveShape shape)
+void AbasePrimitive::setShape(PrimitiveShape shape)
 {
   switch( shape )
   {
@@ -130,7 +130,7 @@ void AbasePrimitive::changeShape(PrimitiveShape shape)
 }
 
 bool 
-AbasePrimitive::SetColor(FColor color)
+AbasePrimitive::setColor(FColor color)
 {
 
   if( m_pMaterialDynamic != nullptr )
