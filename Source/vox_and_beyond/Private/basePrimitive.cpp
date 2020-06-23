@@ -2,6 +2,7 @@
 
 #include "basePrimitive.h"
 #include "Engine/StaticMesh.h"
+#include <climits>
 
 ConstructorHelpers::FObjectFinder<UStaticMesh>* AbasePrimitive::s_cubeMesh = nullptr;
 ConstructorHelpers::FObjectFinder<UStaticMesh>* AbasePrimitive::s_sphereMesh = nullptr;
@@ -14,6 +15,7 @@ AbasePrimitive::AbasePrimitive()
   m_nameOfColorMat(TEXT("")),
   m_pMesh(nullptr),
   m_pMaterialDynamic(nullptr),
+  m_id(FIntVector(std::numeric_limits<int32>::min(), std::numeric_limits<int32>::min(), std::numeric_limits<int32>::min())),
   m_color(FColor(255, 0, 0)),
   m_selectedShape(PrimitiveShape::cube)
 {
@@ -21,7 +23,6 @@ AbasePrimitive::AbasePrimitive()
   PrimaryActorTick.bCanEverTick = true;
   m_pMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Primitive"));
   m_pMesh->SetupAttachment(RootComponent);
-
 
   static ConstructorHelpers::FObjectFinder<UStaticMesh>
   CubeVisual(TEXT("/Game/StarterContent/Shapes/Shape_Cube.Shape_Cube"));
@@ -48,18 +49,88 @@ AbasePrimitive::AbasePrimitive()
 }
 
 bool
-AbasePrimitive::operator<(AbasePrimitive const &other) const
+AbasePrimitive::operator<(AbasePrimitive const* other) const
 {
-  FVector const locationOfMe = this->m_pMesh->GetRelativeLocation();
-  FVector const locationOfOther = other.m_pMesh->GetRelativeLocation();
+  if( m_id.X < other->m_id.X )
+    return true;
 
-  return (FVector::ZeroVector - locationOfMe).SizeSquared() < (FVector::ZeroVector-locationOfOther).SizeSquared();
+  else if( m_id.Y < other->m_id.Y )
+    return true;
+
+  else if( m_id.Z < other->m_id.Z )
+    return true;
+
+  return false;
+}
+
+bool
+AbasePrimitive::operator>(AbasePrimitive const *other) const
+{
+
+  if( m_id.X > other->m_id.X )
+    return true;
+
+  else if( m_id.Y > other->m_id.Y )
+    return true;
+
+  else if( m_id.Z > other->m_id.Z )
+    return true;
+
+  return false;
+}
+
+bool
+AbasePrimitive::operator==(AbasePrimitive const* other) const
+{
+  return m_id == other->m_id;
+}
+
+
+bool
+AbasePrimitive::operator<(AbasePrimitive const& other) const
+{
+  if( m_id.X < other.m_id.X )
+    return true;
+
+  else if( m_id.Y < other.m_id.Y )
+    return true;
+
+  else if( m_id.Z < other.m_id.Z )
+    return true;
+
+  return false;
 }
 
 bool
 AbasePrimitive::operator>(AbasePrimitive const &other) const
 {
-  return !(*this < other);
+
+  if( m_id.X > other.m_id.X )
+    return true;
+
+  else if( m_id.Y > other.m_id.Y )
+    return true;
+
+  else if( m_id.Z > other.m_id.Z )
+    return true;
+
+  return false;
+}
+
+
+bool
+AbasePrimitive::operator==(AbasePrimitive const& other) const
+{
+  return m_id == other.m_id;
+}
+
+
+
+void
+AbasePrimitive::init(FIntVector const& PrimitiveID, FVector const& Location)
+{
+  m_id = PrimitiveID; 
+  m_pMesh->SetRelativeLocation(Location);
 }
 
 
@@ -151,6 +222,12 @@ AbasePrimitive::getHeight() const
   auto buttom = m_pMesh->CalcBounds(m_pMesh->GetRelativeTransform()).GetBox().Min;
 
  return std::fabsf(Top.Z - buttom.Z);
+}
+
+FIntVector 
+AbasePrimitive::getId() const
+{
+  return m_id; 
 }
 
 bool

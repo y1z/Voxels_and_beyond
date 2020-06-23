@@ -2,6 +2,7 @@
 
 
 #include "Grid3D.h"
+#include "basePrimitive.h"
 #include <limits>//std::numeric_limits
 #include <cmath>
 
@@ -19,7 +20,7 @@ AGrid3D::AGrid3D()
   m_deltaDepth(1000.0f),
   m_pMesh(nullptr),
   m_count(0),
-  m_primitiveLimitAmount(int64(std::numeric_limits<int64>::max() /  std::numeric_limits<int32>::max()))
+  m_primitiveLimitAmount(int64(std::numeric_limits<int64>::max() / std::numeric_limits<int32>::max()))
 
 {
   // Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -32,18 +33,18 @@ AGrid3D::AGrid3D()
   static ConstructorHelpers::FObjectFinder<UStaticMesh> Visual
   (TEXT("/Game/StarterContent/Shapes/Shape_Cube.Shape_Cube"));
 
-  static ConstructorHelpers::FObjectFinder<UStaticMesh>
-    Plane(TEXT("/Game/StarterContent/Shapes/Shape_Plane.Shape_Plane"));
-
+  static ConstructorHelpers::FObjectFinder<UStaticMesh> Plane
+  (TEXT("/Game/StarterContent/Shapes/Shape_Plane.Shape_Plane"));
 
   s_cubeMesh = &Visual;
+  s_planeMesh = &Plane;
 
   if( s_cubeMesh->Succeeded() )
   {
-    m_pMesh->SetStaticMesh( s_cubeMesh->Object);
+    m_pMesh->SetStaticMesh(s_cubeMesh->Object);
     float const smallestValue = std::numeric_limits<float>::epsilon();
     m_pMesh->GetCollisionShape().SetBox(FVector(smallestValue, smallestValue, smallestValue));
-    
+
     m_pMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
   }
 
@@ -55,12 +56,14 @@ void AGrid3D::BeginPlay()
 {
   Super::BeginPlay();
 
-  m_pMesh->SetWorldLocation(FVector(0,0,0));
+  m_pMesh->SetWorldLocation(FVector(0, 0, 0));
   m_pMesh->SetRelativeScale3D(FVector(m_width, m_depth, m_height));
 
   auto bounds = m_pMesh->CalcBounds(m_pMesh->GetRelativeTransform());
   m_topLeftPosition = bounds.GetBox().Max;
-  m_buttomRightPostion = bounds.GetBox().Min;
+  m_bottomRightPosition = bounds.GetBox().Min;
+
+  this->calculateDirectionsForGrid();
 
   this->calculateSizeBetweenCubes();
 
@@ -69,16 +72,13 @@ void AGrid3D::BeginPlay()
   m_pMesh->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 
   m_pMesh->SetVisibility(false);
-  
 }
-
 
 void AGrid3D::Tick(float DeltaTime)
 {
   Super::Tick(DeltaTime);
 
 }
-
 
 bool
 AGrid3D::addPrimitiveToGrid(AbasePrimitive* primitive)
@@ -108,12 +108,6 @@ AGrid3D::GetPrimitive(int64 index)
   return nullptr;
 }
 
-void
-AGrid3D::TransFormPrimitive(int64 index)
-{
-  m_primitives[index]->m_pMesh->SetRelativeLocation(m_topLeftPosition);
-}
-
 AbasePrimitive*
 AGrid3D::SpwanInGrid(FVector point)
 {
@@ -121,7 +115,7 @@ AGrid3D::SpwanInGrid(FVector point)
   FActorSpawnParameters spawnParam;
   spawnParam.Template = nullptr;
   spawnParam.Owner = nullptr;
-  if(bounds.GetBox().IsInsideOrOn(point))
+  if( bounds.GetBox().IsInsideOrOn(point) )
   {
     AbasePrimitive* tempPtr = GetWorld()->SpawnActor<AbasePrimitive>(spawnParam);
     tempPtr->m_pMesh->SetRelativeLocation(point);
@@ -130,91 +124,109 @@ AGrid3D::SpwanInGrid(FVector point)
     m_primitives.Add(tempPtr);
     m_primitives.Sort();
     return tempPtr;
-    
+
   }
 
   return nullptr;
 }
 
-FVector 
-AGrid3D::expandGrid(FVector directionOfExpansion)
+FIntVector
+AGrid3D::expandGrid(FIntVector directionOfExpansion)
 {
-  FVector const center = (m_topLeftPosition - m_buttomRightPostion) * .5f;
 
-  FVector const expandingVector = FVector::OneVector * directionOfExpansion;
+  FIntVector const expandingVector =
+    FIntVector(1 * directionOfExpansion.X, 1 * directionOfExpansion.Y, 1 * directionOfExpansion.Z);
 
-  for( int32 i = 3; i >= 0; --i )
+  for( int32 i = 2; i > -1; --i )
   {
-    float  valuePerAxis = expandingVector.Component(i);
-    while( valuePerAxis > 0.9999999f )
+    int32 const valuePerAxis = expandingVector(i);
+    switch( i )
     {
-      switch( i )
+      case 0:
       {
-        case 0:
-        {
-          m_width += 1;
-          m_buttomRightPostion.X -= m_deltaWidth;
-        }
-        break;
-        case 1:
-        {
-          m_depth += 1;
-          m_buttomRightPostion.Y -= m_deltaDepth;
-        }
-        break;
-        case 2:
-        {
-          m_height += 1;
-          m_buttomRightPostion.Z += m_deltaHeight;
-        }
-        break;
+        m_width += valuePerAxis;
+        m_topLeftPosition += m_rightDir * m_deltaWidth * valuePerAxis;
       }
-      valuePerAxis -= 1.0f;
+      break;
+      case 1:
+      {
+        m_depth += valuePerAxis;
+        m_topLeftPosition += m_forwardDir * m_deltaDepth * valuePerAxis;
+      }
+      break;
+      case 2:
+      {
+        m_height += valuePerAxis;
+        m_topLeftPosition += m_upDir * m_deltaHeight * valuePerAxis;
+      }
+      break;
     }
-
   }
 
   this->calculateSizeBetweenCubes();
   this->createFloorForGrid();
-  
-  return FVector(m_width,m_depth,m_height);
+
+  return FIntVector(m_width, m_depth, m_height);
+}
+
+
+void
+AGrid3D::calculateSizeBetweenCubes()
+{
+  m_deltaWidth = std::fabsf(m_topLeftPosition.X - m_bottomRightPosition.X) / std::max(1, m_width);
+  m_deltaDepth = std::fabsf(m_topLeftPosition.Y - m_bottomRightPosition.Y) / std::max(1, m_depth);
+  m_deltaHeight = std::fabsf(m_topLeftPosition.Z - m_bottomRightPosition.Z) / std::max(1, m_height);
 }
 
 void
-AGrid3D::calculateSizeBetweenCubes() 
+AGrid3D::calculateDirectionsForGrid()
 {
-  m_deltaWidth = std::fabsf(m_topLeftPosition.X - m_buttomRightPostion.X) / std::max(1, m_width);
-  m_deltaDepth = std::fabsf(m_topLeftPosition.Y - m_buttomRightPostion.Y) / std::max(1, m_depth);
-  m_deltaHeight = std::fabsf(m_topLeftPosition.Z - m_buttomRightPostion.Z) / std::max(1, m_height);
+  float const deltaInZ = m_topLeftPosition.Z - m_bottomRightPosition.Z;
+  float const deltaInY = m_topLeftPosition.Y - m_bottomRightPosition.Y;
+  float const deltaInX = m_topLeftPosition.X - m_bottomRightPosition.X;
+  m_upDir = FVector(0.0f, .0f, deltaInZ).GetSafeNormal();
+  m_forwardDir = FVector(0.0f, deltaInY, .0f).GetSafeNormal();
+  m_rightDir = FVector(deltaInX, .0f, .0f).GetSafeNormal();
 }
 
-void 
+void
 AGrid3D::createFloorForGrid()
 {
-  float const lowestZ = m_buttomRightPostion.Z;
+  float const lowestZ = m_bottomRightPosition.Z;
 
   FActorSpawnParameters spawnParam;
   spawnParam.Template = nullptr;
   spawnParam.Owner = this;
-
-
-  for( int32 i = m_width; i > 0 ; --i )
+  AbasePrimitive* testingPrimitive = GetWorld()->SpawnActor<AbasePrimitive>(spawnParam);
+  for( int32 i = m_width; i > 0; --i )
   {
-    
-    for (int32 j = m_depth; j > 0 ; --j )
+
+    for( int32 j = m_depth; j > 0; --j )
     {
-      AbasePrimitive* tempPtr = GetWorld()->SpawnActor<AbasePrimitive>(spawnParam);
       FVector const InGridPosition = FVector((m_deltaWidth * i), (m_deltaDepth * j), lowestZ);
-      FTransform const transformForGridPosition(this->m_buttomRightPostion + InGridPosition);
+      FVector const finalLocation = (this->m_bottomRightPosition + InGridPosition);
 
-      tempPtr->m_pMesh->SetWorldTransform(transformForGridPosition);
+      FIntVector const ID = FIntVector(i, j, 0);
+      testingPrimitive->init(ID, finalLocation);
+        bool const addPrimitive =  nullptr == m_primitives.FindByPredicate([ID](AbasePrimitive const *ptr) {
+          return ID.X == ptr->getId().X &&
+            ID.Y == ptr->getId().Y &&
+            ID.Z == ptr->getId().Z;
+        });
+      if( addPrimitive  )
+      {
+        AbasePrimitive* primitiveToGoInGrid = GetWorld()->SpawnActor<AbasePrimitive>(spawnParam);
+        primitiveToGoInGrid->init(ID, finalLocation);
 
-      tempPtr->setColor(FColor(224, 189,150,255));
-      tempPtr->setShape(PrimitiveShape::cube);
-      m_primitives.Add(tempPtr);
+        primitiveToGoInGrid->setColor(FColor(224, 189, 150, 255));
+        primitiveToGoInGrid->setShape(PrimitiveShape::cube);
+
+        m_primitives.Add(primitiveToGoInGrid);
+      }
     }
-
   }
+  m_primitives.Sort();
+  GetWorld()->DestroyActor(testingPrimitive);
 }
 
 

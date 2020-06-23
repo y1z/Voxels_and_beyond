@@ -30,6 +30,25 @@ public: // operators
   * @brief Compares the 2 primitives distance from the coordinate (0,0,0)
   */
   bool 
+  operator <(AbasePrimitive const* other) const;
+
+  /**
+  * @brief Compares the 2 primitives distance from the coordinate (0,0,0)
+  */
+  bool 
+  operator >(AbasePrimitive const* other) const;
+
+  /**
+  * @brief Compares the 2 primitives distance from the coordinate (0,0,0)
+  */
+  bool
+  operator == (AbasePrimitive const* other)const;
+
+
+  /**
+  * @brief Compares the 2 primitives distance from the coordinate (0,0,0)
+  */
+  bool 
   operator <(AbasePrimitive const& other) const;
 
   /**
@@ -38,8 +57,17 @@ public: // operators
   bool 
   operator >(AbasePrimitive const& other) const;
 
+  /**
+  * @brief Compares the 2 primitives distance from the coordinate (0,0,0)
+  */
+  bool
+  operator == (AbasePrimitive const& other)const;
 
 public:
+
+  void 
+  init(FIntVector const &PrimitiveID,
+       FVector const& Location);
 
   /**
   * @brief Changes the shape of the current primitive.
@@ -59,6 +87,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	float getHeight()const;
 
+  /**
+  * @returns The Id of the Primitive
+  */
+	UFUNCTION(BlueprintCallable)
+  FIntVector getId()const;
+
 
 private:
 
@@ -75,14 +109,13 @@ private:
   initMaterialInstanceDynamic();
 	
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 public:
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 public:// variables
 
+public:
   /**
   * @brief The name of the Material used to color the primitive.
   */
@@ -94,24 +127,30 @@ public:// variables
   */
 	UPROPERTY(VisibleAnywhere)
   UStaticMeshComponent* m_pMesh;
-  
-
 
   /**
   * @brief The material used to color the primitive.
   */
   UPROPERTY(EditAnywhere)
   UMaterialInstanceDynamic* m_pMaterialDynamic;
-private:  
+
+private:
+  /**
+  * @brief Defines an Id to be used to find a vector.
+  */
+	UPROPERTY(VisibleAnywhere)
+  FIntVector m_id;
+
 public:
+  /**
+  * @brief The Color of the primitive
+  */
 	UPROPERTY(EditAnywhere)
   FColor m_color;
 
 protected:
 	UPROPERTY(VisibleAnywhere)
 	PrimitiveShape m_selectedShape;
-
-protected:
 
   /**
   * @brief A pointer to a cube mesh

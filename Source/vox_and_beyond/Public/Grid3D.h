@@ -4,11 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "basePrimitive.h"
 #include "UObject/ConstructorHelpers.h"
+
 #include "Grid3D.generated.h"
 
-  //auto bounds = m_pMesh->CalcBounds(m_pMesh->GetRelativeTransform());
+/**
+* FORWARD DECLARATIONS
+*/
+class AbasePrimitive;
+
 UCLASS(Blueprintable)
 class VOX_AND_BEYOND_API AGrid3D : public AActor
 {
@@ -37,10 +41,6 @@ public:
 	GetPrimitive(int64 index);
 
 	UFUNCTION(BlueprintCallable)
-  void
-  TransFormPrimitive(int64 index);
-
-	UFUNCTION(BlueprintCallable)
   AbasePrimitive*
   SpwanInGrid(FVector point);
 
@@ -50,16 +50,34 @@ public:
   * @bug no known bugs
   */
 	UFUNCTION(BlueprintCallable)
-  FVector 
-  expandGrid(FVector directionOfExpansion);
+  FIntVector 
+  expandGrid(FIntVector directionOfExpansion);
 
 private:
 
+  /**
+  * @brief Calculates the delta between each Primitive in the Grid.
+  * @bug no known bugs.
+  */
   void
   calculateSizeBetweenCubes();
 
+  /**
+  * @brief Calculates the 'forward' , 'up' and 'right' directions for the Grid.
+  * @bug no known bugs.
+  */
+  void
+  calculateDirectionsForGrid();
+
+  /**
+  * @brief Creates the floor for the 3D grid.
+  * @note This should ONLY be called for the creation of a grid.
+  * @bug no known bugs.
+  */
   void
   createFloorForGrid();
+
+
 
 public:
   /**
@@ -125,12 +143,42 @@ private:
 
 public:
 
-	UPROPERTY(EditAnywhere)
-	FVector m_topLeftPosition;
+  /**
+  * @brief Where the top left position relative to the grid is located.
+  */
+  UPROPERTY(VisibleAnywhere)
+  FVector m_topLeftPosition;
 
-	UPROPERTY(EditAnywhere)
-  FVector m_buttomRightPostion;
+  /**
+  * @brief Where the bottom right position relative to the grid is located.
+  */
+  UPROPERTY(VisibleAnywhere)
+  FVector m_bottomRightPosition;
 
-  UPROPERTY(EditAnywhere)
+  /**
+  * @brief Defines the 'forward' direction relative to the grid
+  */
+  UPROPERTY(VisibleAnywhere)
+  FVector m_forwardDir;
+
+  /**
+  * @brief Defines the 'up' direction relative to the grid.
+  */
+  UPROPERTY(VisibleAnywhere)
+  FVector m_upDir;
+
+
+  /**
+  * @brief Defines the 'right' direction relative to the grid.
+  */
+  UPROPERTY(VisibleAnywhere)
+  FVector m_rightDir;
+
+  /**
+  * @brief Contains all the base primitives.
+  */
+  UPROPERTY(VisibleAnywhere)
   TArray<AbasePrimitive*> m_primitives;
+
 };
+
