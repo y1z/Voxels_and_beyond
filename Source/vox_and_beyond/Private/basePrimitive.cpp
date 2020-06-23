@@ -77,12 +77,14 @@ void AbasePrimitive::BeginPlay()
 
 
 // Called every frame
-void AbasePrimitive::Tick(float DeltaTime)
+void
+AbasePrimitive::Tick(float DeltaTime)
 {
   Super::Tick(DeltaTime);
 }
 
-void AbasePrimitive::setShape(PrimitiveShape shape)
+void 
+AbasePrimitive::setShape(PrimitiveShape shape)
 {
   switch( shape )
   {

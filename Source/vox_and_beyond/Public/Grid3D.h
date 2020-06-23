@@ -40,15 +40,26 @@ public:
   void
   TransFormPrimitive(int64 index);
 
-  // TODO : ADD COLOR PARAM
 	UFUNCTION(BlueprintCallable)
   AbasePrimitive*
   SpwanInGrid(FVector point);
 
+  /**
+  * @brief Expands the Grid.
+  * @returns A vector that contains how big each axis is .
+  * @bug no known bugs
+  */
+	UFUNCTION(BlueprintCallable)
+  FVector 
+  expandGrid(FVector directionOfExpansion);
+
 private:
 
-  void//between
+  void
   calculateSizeBetweenCubes();
+
+  void
+  createFloorForGrid();
 
 public:
   /**
@@ -91,7 +102,15 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent *m_pMesh;
 
-  static ConstructorHelpers::FObjectFinder<UStaticMesh>* s_pointerToMesh;
+  /**
+  * @brief A pointer to a static mesh
+  */
+  static ConstructorHelpers::FObjectFinder<UStaticMesh>* s_cubeMesh;
+
+  /**
+  * @brief A pointer to a static mesh
+  */
+  static ConstructorHelpers::FObjectFinder<UStaticMesh>* s_planeMesh;
 
   /**
   * @brief keeps track of how many primitive the grid has.

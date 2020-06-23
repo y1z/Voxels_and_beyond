@@ -12,8 +12,8 @@ enum class PrimitiveShape : uint8
 {
 	cube UMETA(DisplayName = "cube shape"),
 	sphere UMETA(DisplayName = "sphere shape"),
-  pyramid UMETA(DisplayName = "sphere pyramid"),
-	quadPyramid UMETA(DisplayName = "sphere quadPyramid"),
+  pyramid UMETA(DisplayName = "pyramid shape "),
+	quadPyramid UMETA(DisplayName = "quadPyramid shape "),
 };
 
 
