@@ -10,6 +10,10 @@ ConstructorHelpers::FObjectFinder<UStaticMesh>* AGrid3D::s_cubeMesh = nullptr;
 
 ConstructorHelpers::FObjectFinder<UStaticMesh>* AGrid3D::s_planeMesh = nullptr;
 
+auto selectOnlyTheFloorPrimitives = [](AbasePrimitive const* ptr) {
+  return 0 == ptr->getId().Z;
+};
+
 // Sets default values
 AGrid3D::AGrid3D()
   :m_width(16),
@@ -27,6 +31,8 @@ AGrid3D::AGrid3D()
   PrimaryActorTick.bCanEverTick = false;
   m_pMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("3D Grid"));
   m_pMesh->SetupAttachment(RootComponent);
+
+  updateGridSize();
 
   m_primitives.Reserve(m_width * m_height * m_depth);
 
@@ -57,11 +63,8 @@ void AGrid3D::BeginPlay()
   Super::BeginPlay();
 
   m_pMesh->SetWorldLocation(FVector(0, 0, 0));
-  m_pMesh->SetRelativeScale3D(FVector(m_width, m_depth, m_height));
 
-  auto bounds = m_pMesh->CalcBounds(m_pMesh->GetRelativeTransform());
-  m_topLeftPosition = bounds.GetBox().Max;
-  m_bottomRightPosition = bounds.GetBox().Min;
+  updateGridSize();
 
   this->calculateDirectionsForGrid();
 
@@ -108,38 +111,13 @@ AGrid3D::GetPrimitive(int64 index)
   return nullptr;
 }
 
-AbasePrimitive*
-AGrid3D::SpwanInGrid(FVector point)
-{
-  auto bounds = m_pMesh->CalcBounds(m_pMesh->GetRelativeTransform());
-  FActorSpawnParameters spawnParam;
-  spawnParam.Template = nullptr;
-  spawnParam.Owner = nullptr;
-  if( bounds.GetBox().IsInsideOrOn(point) )
-  {
-    AbasePrimitive* tempPtr = GetWorld()->SpawnActor<AbasePrimitive>(spawnParam);
-    tempPtr->m_pMesh->SetRelativeLocation(point);
-    tempPtr->setColor(FColor::Cyan);
-
-    m_primitives.Add(tempPtr);
-    m_primitives.Sort();
-    return tempPtr;
-
-  }
-
-  return nullptr;
-}
 
 FIntVector
 AGrid3D::expandGrid(FIntVector directionOfExpansion)
 {
-
-  FIntVector const expandingVector =
-    FIntVector(1 * directionOfExpansion.X, 1 * directionOfExpansion.Y, 1 * directionOfExpansion.Z);
-
   for( int32 i = 2; i > -1; --i )
   {
-    int32 const valuePerAxis = expandingVector(i);
+    int32 const valuePerAxis = directionOfExpansion(i);
     switch( i )
     {
       case 0:
@@ -169,6 +147,28 @@ AGrid3D::expandGrid(FIntVector directionOfExpansion)
   return FIntVector(m_width, m_depth, m_height);
 }
 
+void
+AGrid3D::resizeGrid(FIntVector newGridSize)
+{
+  destroyGridFloor();
+
+  m_width = newGridSize.X;
+  m_depth = newGridSize.Y;
+  m_height = newGridSize.Z;
+  updateGridSize();
+
+  this->calculateSizeBetweenCubes();
+
+
+  createFloorForGrid();
+}
+
+FIntVector 
+AGrid3D::getGridSizePerAxis() const
+{
+  return FIntVector(m_width,m_depth,m_height);
+}
+
 
 void
 AGrid3D::calculateSizeBetweenCubes()
@@ -176,6 +176,16 @@ AGrid3D::calculateSizeBetweenCubes()
   m_deltaWidth = std::fabsf(m_topLeftPosition.X - m_bottomRightPosition.X) / std::max(1, m_width);
   m_deltaDepth = std::fabsf(m_topLeftPosition.Y - m_bottomRightPosition.Y) / std::max(1, m_depth);
   m_deltaHeight = std::fabsf(m_topLeftPosition.Z - m_bottomRightPosition.Z) / std::max(1, m_height);
+}
+
+void 
+AGrid3D::updateGridSize()
+{
+  m_pMesh->SetRelativeScale3D(FVector(m_width, m_depth, m_height));
+
+  auto bounds = m_pMesh->CalcBounds(m_pMesh->GetRelativeTransform());
+  m_topLeftPosition = bounds.GetBox().Max;
+  m_bottomRightPosition = bounds.GetBox().Min;
 }
 
 void
@@ -197,7 +207,6 @@ AGrid3D::createFloorForGrid()
   FActorSpawnParameters spawnParam;
   spawnParam.Template = nullptr;
   spawnParam.Owner = this;
-  AbasePrimitive* testingPrimitive = GetWorld()->SpawnActor<AbasePrimitive>(spawnParam);
   for( int32 i = m_width; i > 0; --i )
   {
 
@@ -207,12 +216,14 @@ AGrid3D::createFloorForGrid()
       FVector const finalLocation = (this->m_bottomRightPosition + InGridPosition);
 
       FIntVector const ID = FIntVector(i, j, 0);
-      testingPrimitive->init(ID, finalLocation);
-        bool const addPrimitive =  nullptr == m_primitives.FindByPredicate([ID](AbasePrimitive const *ptr) {
-          return ID.X == ptr->getId().X &&
-            ID.Y == ptr->getId().Y &&
-            ID.Z == ptr->getId().Z;
-        });
+      auto compareIDs = [&ID](AbasePrimitive const* ptr) 
+      {
+        return ID.X == ptr->getId().X &&
+          ID.Y == ptr->getId().Y &&
+          ID.Z == ptr->getId().Z; 
+      };
+
+      bool const addPrimitive = (nullptr == m_primitives.FindByPredicate(compareIDs));
       if( addPrimitive  )
       {
         AbasePrimitive* primitiveToGoInGrid = GetWorld()->SpawnActor<AbasePrimitive>(spawnParam);
@@ -226,7 +237,29 @@ AGrid3D::createFloorForGrid()
     }
   }
   m_primitives.Sort();
-  GetWorld()->DestroyActor(testingPrimitive);
+}
+
+void 
+AGrid3D::destroyGridFloor()
+{
+  UWorld* const worldPtr = GetWorld();
+  for( int32 i = m_width; i > 0; --i )
+  {
+
+    for( int32 j = m_depth; j > 0; --j )
+    {
+
+      AbasePrimitive** primitive = m_primitives.FindByPredicate(selectOnlyTheFloorPrimitives);
+      if( nullptr != primitive )
+      {
+        worldPtr->DestroyActor(primitive[0]);
+        m_primitives.RemoveSingle(primitive[0]);
+      }
+    }
+  }
+
+  m_primitives.Shrink();
+  m_primitives.Sort();
 }
 
 

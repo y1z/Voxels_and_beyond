@@ -45,6 +45,8 @@ AbasePrimitive::AbasePrimitive()
   if( s_sphereMesh->Succeeded() )
   {
     m_pMesh->SetStaticMesh(s_sphereMesh->Object);
+    TArray<USceneComponent*>Components;
+    m_pMesh->GetParentComponents(Components);
   }
 }
 
@@ -218,10 +220,24 @@ AbasePrimitive::setColor(FColor color)
 float 
 AbasePrimitive::getHeight() const
 {
-  auto Top = m_pMesh->CalcBounds(m_pMesh->GetRelativeTransform()).GetBox().Max;
-  auto buttom = m_pMesh->CalcBounds(m_pMesh->GetRelativeTransform()).GetBox().Min;
+  auto const top = m_pMesh->CalcBounds(m_pMesh->GetRelativeTransform()).GetBox().Max;
+  auto const bottom = m_pMesh->CalcBounds(m_pMesh->GetRelativeTransform()).GetBox().Min;
 
- return std::fabsf(Top.Z - buttom.Z);
+ return std::fabsf(top.Z - bottom.Z);
+}
+
+void
+AbasePrimitive::rotatePrimitive(int32 horizontalRotations,
+                                int32 verticalRotations ,
+                                int32 zAxisRotation )
+{
+  constexpr static int32 rotationStep = 90;
+
+  FRotator const resultRotator(verticalRotations * rotationStep,
+                               horizontalRotations * rotationStep,
+                               zAxisRotation * rotationStep);
+  m_pMesh->AddLocalRotation(resultRotator);
+ //m_pMesh->SetRelativeRotation(resultRotator);
 }
 
 FIntVector 
@@ -247,6 +263,7 @@ AbasePrimitive::initMaterialInstanceDynamic()
     {
       m_nameOfColorMat = OutParameterInfo[0].Name;
 
+      auto result = OutParameterInfo.Find(getMaterialColorName());
       return true;
     }
   }

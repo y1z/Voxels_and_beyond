@@ -35,14 +35,12 @@ public:
   bool 
   addPrimitiveToGrid(AbasePrimitive* primitive);
 
-
+  /**
+  * @brief Get a pointer to a certain primitive.
+  */
 	UFUNCTION(BlueprintCallable)
   AbasePrimitive*
 	GetPrimitive(int64 index);
-
-	UFUNCTION(BlueprintCallable)
-  AbasePrimitive*
-  SpwanInGrid(FVector point);
 
   /**
   * @brief Expands the Grid.
@@ -53,6 +51,25 @@ public:
   FIntVector 
   expandGrid(FIntVector directionOfExpansion);
 
+  /**
+  * @brief Resizes the grid.
+  * @bug no known bugs
+  */
+	UFUNCTION(BlueprintCallable)
+  void
+  resizeGrid(FIntVector newGridSize);
+
+
+  /**
+  * @brief A Representation of how big the Grid is.
+  * @returns A vector that contains how big each axis is .
+  * @bug no known bugs
+  */
+	UFUNCTION(BlueprintCallable)
+  FIntVector 
+  getGridSizePerAxis()const;
+
+
 private:
 
   /**
@@ -61,6 +78,12 @@ private:
   */
   void
   calculateSizeBetweenCubes();
+
+  /**
+  * @brief updates all variables related with the grid size.
+  */
+  void
+  updateGridSize();
 
   /**
   * @brief Calculates the 'forward' , 'up' and 'right' directions for the Grid.
@@ -76,6 +99,12 @@ private:
   */
   void
   createFloorForGrid();
+
+  /**
+  * @brief Remove the current grid floor.
+  */
+  void
+  destroyGridFloor();
 
 
 

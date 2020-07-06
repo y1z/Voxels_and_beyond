@@ -73,19 +73,27 @@ public:
   * @brief Changes the shape of the current primitive.
   */
 	UFUNCTION(BlueprintCallable)
-	void setShape(PrimitiveShape shape);
+	void
+  setShape(PrimitiveShape shape);
 
   /**
   * @brief Changes the color of the primitive
   */
 	UFUNCTION(BlueprintCallable)
-	bool setColor(FColor color);
+	bool
+  setColor(FColor color);
 
   /**
   * @returns The height of the primitive 
   */
 	UFUNCTION(BlueprintCallable)
-	float getHeight()const;
+	float
+  getHeight()const;
+
+
+	UFUNCTION(BlueprintCallable)
+  void 
+  rotatePrimitive(int32 horizontalRotations, int32 verticalRotations = 0 , int32 zAxisRotation = 0);
 
   /**
   * @returns The Id of the Primitive
@@ -125,7 +133,7 @@ public:
   /**
   * @brief The name static mesh used to visualize the primitive
   */
-	UPROPERTY(VisibleAnywhere)
+  UPROPERTY(EditAnywhere)
   UStaticMeshComponent* m_pMesh;
 
   /**
