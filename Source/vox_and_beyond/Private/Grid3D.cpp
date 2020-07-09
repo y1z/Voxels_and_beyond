@@ -10,9 +10,6 @@ ConstructorHelpers::FObjectFinder<UStaticMesh>* AGrid3D::s_cubeMesh = nullptr;
 
 ConstructorHelpers::FObjectFinder<UStaticMesh>* AGrid3D::s_planeMesh = nullptr;
 
-auto selectOnlyTheFloorPrimitives = [](AbasePrimitive const* ptr) {
-  return 0 == ptr->getId().Z;
-};
 
 // Sets default values
 AGrid3D::AGrid3D()
@@ -243,12 +240,20 @@ void
 AGrid3D::destroyGridFloor()
 {
   UWorld* const worldPtr = GetWorld();
+
+  auto const currentWidth = m_width;
+  auto const currentDepth = m_depth;
+
+  auto selectOnlyTheFloorPrimitives = [currentWidth,currentDepth](AbasePrimitive const* ptr) {
+    return 0 == ptr->getId().Z ||
+      currentDepth < ptr->getId().Y ||
+      currentWidth < ptr->getId().X;
+  };
   for( int32 i = m_width; i > 0; --i )
   {
 
     for( int32 j = m_depth; j > 0; --j )
     {
-
       AbasePrimitive** primitive = m_primitives.FindByPredicate(selectOnlyTheFloorPrimitives);
       if( nullptr != primitive )
       {
@@ -260,6 +265,23 @@ AGrid3D::destroyGridFloor()
 
   m_primitives.Shrink();
   m_primitives.Sort();
+}
+
+bool 
+AGrid3D::destroyPrimitive(AbasePrimitive* primitiveToDestroy)
+{
+  TArray<AbasePrimitive*>::SizeType indexOfElement;
+  bool const isRemoved = m_primitives.Find(primitiveToDestroy, indexOfElement);
+
+  if( INDEX_NONE != indexOfElement )
+  {
+    GetWorld()->DestroyActor(m_primitives[indexOfElement]);
+    m_primitives.RemoveAt(indexOfElement);
+    --m_count;
+  }
+
+
+  return isRemoved;
 }
 
 

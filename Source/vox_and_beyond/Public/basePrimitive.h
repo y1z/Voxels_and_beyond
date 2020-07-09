@@ -63,11 +63,31 @@ public: // operators
   bool
   operator == (AbasePrimitive const& other)const;
 
+  /**
+  * @brief Compares 2 AbasePrimitive's with the > operator.(doing this because unreal engine)
+  */
+  bool
+  operator() (AbasePrimitive const* other)const; 
+
 public:
 
+	UFUNCTION(BlueprintCallable)
   void 
-  init(FIntVector const &PrimitiveID,
-       FVector const& Location);
+  init(FIntVector const PrimitiveID,
+       FVector const Location,
+       AbasePrimitive * primitive = nullptr,
+       bool attachToPrimitive = true);
+
+  /**
+  * @brief 
+  * @bug
+  * @param[in] 
+  */
+  void
+  calculatePoints();
+
+  FIntVector 
+  calculatePosition(FVector point)const;
 
   /**
   * @brief Changes the shape of the current primitive.
@@ -89,6 +109,42 @@ public:
 	UFUNCTION(BlueprintCallable)
 	float
   getHeight()const;
+
+  /**
+  * @returns The Width of the primitive 
+  */
+	UFUNCTION(BlueprintCallable)
+	float
+  getWidth()const;
+
+  /**
+  * @returns The Depth of the primitive 
+  */
+	UFUNCTION(BlueprintCallable)
+	float
+  getDepth()const;
+
+  /**
+  * @returns The center of the primitive relative to world space.
+  */
+	UFUNCTION(BlueprintCallable)
+  FVector 
+  getAbsoluteCenter()const;
+
+  /**
+  * @returns The center of the primitive relative to its self.
+  */
+	UFUNCTION(BlueprintCallable)
+  FVector 
+  getRelativeToSelfCenter()const;
+
+
+  /**
+  * @returns The Top left corner of the primitive.
+  */
+	UFUNCTION(BlueprintCallable)
+  FVector 
+  getTopLeftCorner()const;
 
 
 	UFUNCTION(BlueprintCallable)
@@ -122,8 +178,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 public:// variables
-
-public:
   /**
   * @brief The name of the Material used to color the primitive.
   */
@@ -149,13 +203,36 @@ private:
 	UPROPERTY(VisibleAnywhere)
   FIntVector m_id;
 
-public:
   /**
-  * @brief The Color of the primitive
+  * @brief Defines a point directlly in front of the primitive
   */
-	UPROPERTY(EditAnywhere)
-  FColor m_color;
+  FVector m_frontPoint;
 
+
+  /**
+  * @brief Defines a point directlly in front of the primitive
+  */
+  FVector m_backPoint;
+
+  /**
+  * @brief Defines a point directlly in front of the primitive
+  */
+  FVector m_rightPoint;
+
+  /**
+  * @brief Defines a point directlly in front of the primitive
+  */
+  FVector m_leftPoint;
+
+  /**
+  * @brief Defines a point directlly in front of the primitive
+  */
+  FVector m_downPoint;
+
+  /**
+  * @brief Defines a point directlly in front of the primitive
+  */
+  FVector m_upPoint;
 protected:
 	UPROPERTY(VisibleAnywhere)
 	PrimitiveShape m_selectedShape;

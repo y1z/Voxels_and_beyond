@@ -31,8 +31,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	
-	UFUNCTION(BlueprintCallable)
-  bool 
+  UFUNCTION(BlueprintCallable)
+  bool
   addPrimitiveToGrid(AbasePrimitive* primitive);
 
   /**
@@ -68,6 +68,7 @@ public:
 	UFUNCTION(BlueprintCallable)
   FIntVector 
   getGridSizePerAxis()const;
+
 
 
 private:
@@ -106,9 +107,15 @@ private:
   void
   destroyGridFloor();
 
-
-
 public:
+  /**
+  * @brief Used to delete An element in the grid.
+  */
+	UFUNCTION(BlueprintCallable)
+  bool 
+  destroyPrimitive(AbasePrimitive *primitiveToDestroy);
+
+
   /**
   * @brief controls how big the grid is in the X-Axis.
   */
