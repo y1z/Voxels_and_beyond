@@ -13,6 +13,13 @@
 */
 class AbasePrimitive;
 
+struct GridData
+{
+  TArray <FIntVector> m_vectorIds;
+  TArray <FRotator> m_rotations;
+  TArray <FColor> m_colors;
+};
+
 UCLASS(Blueprintable)
 class VOX_AND_BEYOND_API AGrid3D : public AActor
 {
@@ -217,4 +224,8 @@ public:
   TArray<AbasePrimitive*> m_primitives;
 
 };
+
+
+
+
 

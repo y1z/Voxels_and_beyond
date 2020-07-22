@@ -4,11 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+
 #include "Utility.generated.h"
 
 
 
 class AGrid3D;
+class AbasePrimitive;
 
 
 /**
@@ -26,8 +28,59 @@ public:
   * @param[in] fileName : the name of file where the data is going to.
   */
   UFUNCTION(BlueprintCallable,Category = "saving and loading")
-  static bool saveGridData(AGrid3D* const ptr_grid, FString fileName);
+  static bool
+  saveGridData(AGrid3D* const ptr_grid, FString fileName);
 
-  
-	
+  /**
+  * @brief 
+  * @param[out] ptr_grid : The pointer to the grid that will contain the data
+  * from the file.
+  * @param[in] fileName : The name of the file.
+  */
+  UFUNCTION(BlueprintCallable,Category = "saving and loading")
+  static bool
+  loadGridData(AGrid3D* const ptr_grid, FString fileName);
+
+private:
+
+  /**
+  * @brief parses and puts the data .
+  * @param[in] data : contains the data for positions in the grid
+  */
+  static TArray<FIntVector>
+  parsePositionData(const FString& data);
+
+  /**
+  * @returns The string with the relevant data.
+  * @param[in] data : contains the relevant data.
+  */
+  static FString
+  loadPositionData(const FString& data);
+
+  /**
+  * @returns The path to the save directory.
+  */
+  UFUNCTION(BlueprintGetter,Category = "saving and loading")
+  static FString
+  getSaveDirectory();
+
+public:
+
+  /**
+  * @brief : creates a copy of a FString given a range.
+  * @param[in] startPosition : The position to start from.
+  * @param[in] endPosition : The position to start from.
+  * @param[in] originalString : 
+  */
+  static FString
+  createSubString(const int32 startPosition,
+                  const int32 endPosition,
+                  const FString& originalString);
+
+
+  /**
+  * @returns true when all the character of the string are numbers.
+  */
+  static bool 
+  isNumber(const TCHAR *Tstring);
 };
