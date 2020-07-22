@@ -5,19 +5,16 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "UObject/ConstructorHelpers.h"
+#include "basePrimitive.h"
 
 #include "Grid3D.generated.h"
-
-/**
-* FORWARD DECLARATIONS
-*/
-class AbasePrimitive;
 
 struct GridData
 {
   TArray <FIntVector> m_vectorIds;
   TArray <FRotator> m_rotations;
   TArray <FColor> m_colors;
+  TArray<PrimitiveShape> m_shapes;
 };
 
 UCLASS(Blueprintable)
@@ -75,10 +72,37 @@ public:
 	UFUNCTION(BlueprintCallable)
   FIntVector 
   getGridSizePerAxis()const;
+public:
 
 
+	UFUNCTION(BlueprintCallable,Category = "saving and loading")
+  bool
+  loadDataFromFile(FString fileName);
+
+
+  /**
+  * @brief Uses the GridData to create a series of primitives.
+  */
+  void
+  createGridFromData(GridData &data);
 
 private:
+
+
+  /**
+  * @brief create a series of primitives using there relative position in the grid.
+  */
+  void
+  createPrimitivesByRelativePosition(const TArray<FIntVector>& Positions );
+
+  FVector
+  calculatePositionInGrid(const FIntVector relativePosition) const;
+
+  /**
+  * @returns the default parameter for spawning a another actor.
+  */
+  FActorSpawnParameters
+  spawnParameters();
 
   /**
   * @brief Calculates the delta between each Primitive in the Grid.
@@ -113,6 +137,12 @@ private:
   */
   void
   destroyGridFloor();
+
+  /**
+  * @brief Remove all primitives from the grid.
+  */
+  void
+  destroyAllGrid();
 
 public:
   /**

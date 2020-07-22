@@ -2,7 +2,7 @@
 
 
 #include "Grid3D.h"
-#include "basePrimitive.h"
+#include "Utility.h"
 #include <limits>//std::numeric_limits
 #include <cmath>
 
@@ -160,10 +160,65 @@ AGrid3D::resizeGrid(FIntVector newGridSize)
   createFloorForGrid();
 }
 
-FIntVector 
+FIntVector
 AGrid3D::getGridSizePerAxis() const
 {
-  return FIntVector(m_width,m_depth,m_height);
+  return FIntVector(m_width, m_depth, m_height);
+}
+
+bool
+AGrid3D::loadDataFromFile(FString fileName)
+{
+  destroyAllGrid();
+  return UUtility::loadGridData(this, fileName);
+}
+
+void 
+AGrid3D::createGridFromData(GridData& data)
+{
+  createPrimitivesByRelativePosition(data.m_vectorIds);
+  
+}
+
+void 
+AGrid3D::createPrimitivesByRelativePosition(const TArray<FIntVector>& Positions)
+{
+  FActorSpawnParameters spawnParam = this->spawnParameters();
+   
+  for (const FIntVector& Element : Positions)
+  {
+    const FVector locationInGrid = calculatePositionInGrid(Element);
+
+    AbasePrimitive* primitiveToGoInGrid = GetWorld()->SpawnActor<AbasePrimitive>(spawnParam);
+    primitiveToGoInGrid->init(Element, locationInGrid);
+
+    primitiveToGoInGrid->setColor(FColor(255 * 0.60, 255 * 0.60, 255 * 0.60f, 255));
+    primitiveToGoInGrid->setShape(PrimitiveShape::cube);
+
+    m_primitives.Add(primitiveToGoInGrid);
+
+  }
+
+  m_primitives.Sort();
+
+}
+
+FVector 
+AGrid3D::calculatePositionInGrid(const FIntVector relativePosition) const
+{
+  FVector const InGridPosition = FVector((m_deltaWidth * relativePosition.X),
+                                         (m_deltaDepth * relativePosition.Y),
+                                         m_deltaHeight * relativePosition.Z);
+  return(this->m_bottomRightPosition + InGridPosition);
+}
+
+FActorSpawnParameters
+AGrid3D::spawnParameters()
+{
+  FActorSpawnParameters spawnParam;
+  spawnParam.Template = nullptr;
+  spawnParam.Owner = this;
+  return  spawnParam;
 }
 
 
@@ -175,7 +230,7 @@ AGrid3D::calculateSizeBetweenCubes()
   m_deltaHeight = std::fabsf(m_topLeftPosition.Z - m_bottomRightPosition.Z) / std::max(1, m_height);
 }
 
-void 
+void
 AGrid3D::updateGridSize()
 {
   m_pMesh->SetRelativeScale3D(FVector(m_width, m_depth, m_height));
@@ -213,15 +268,14 @@ AGrid3D::createFloorForGrid()
       FVector const finalLocation = (this->m_bottomRightPosition + InGridPosition);
 
       FIntVector const ID = FIntVector(i, j, 0);
-      auto compareIDs = [&ID](AbasePrimitive const* ptr) 
-      {
+      auto compareIDs = [&ID](AbasePrimitive const* ptr) {
         return ID.X == ptr->getId().X &&
           ID.Y == ptr->getId().Y &&
-          ID.Z == ptr->getId().Z; 
+          ID.Z == ptr->getId().Z;
       };
 
       bool const addPrimitive = (nullptr == m_primitives.FindByPredicate(compareIDs));
-      if( addPrimitive  )
+      if( addPrimitive )
       {
         AbasePrimitive* primitiveToGoInGrid = GetWorld()->SpawnActor<AbasePrimitive>(spawnParam);
         primitiveToGoInGrid->init(ID, finalLocation);
@@ -236,7 +290,7 @@ AGrid3D::createFloorForGrid()
   m_primitives.Sort();
 }
 
-void 
+void
 AGrid3D::destroyGridFloor()
 {
   UWorld* const worldPtr = GetWorld();
@@ -244,7 +298,7 @@ AGrid3D::destroyGridFloor()
   auto const currentWidth = m_width;
   auto const currentDepth = m_depth;
 
-  auto selectOnlyTheFloorPrimitives = [currentWidth,currentDepth](AbasePrimitive const* ptr) {
+  auto selectOnlyTheFloorPrimitives = [currentWidth, currentDepth](AbasePrimitive const* ptr) {
     return 0 == ptr->getId().Z ||
       currentDepth < ptr->getId().Y ||
       currentWidth < ptr->getId().X;
@@ -267,7 +321,17 @@ AGrid3D::destroyGridFloor()
   m_primitives.Sort();
 }
 
-bool 
+void
+AGrid3D::destroyAllGrid()
+{
+  for( TArray<AbasePrimitive*>::SizeType i = m_primitives.Num() - 1; i != 0; --i )
+  {
+    destroyPrimitive(m_primitives[i]);
+  }
+
+}
+
+bool
 AGrid3D::destroyPrimitive(AbasePrimitive* primitiveToDestroy)
 {
   TArray<AbasePrimitive*>::SizeType indexOfElement;

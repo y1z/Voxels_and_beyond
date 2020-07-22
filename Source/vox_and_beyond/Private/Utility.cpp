@@ -81,6 +81,8 @@ UUtility::loadGridData(AGrid3D* const ptr_grid,
     GridData gridData;
 
     gridData.m_vectorIds = parsePositionData(unParsedPositionData);
+
+    ptr_grid->createGridFromData(gridData);
   }
 
   return isLoaded;
