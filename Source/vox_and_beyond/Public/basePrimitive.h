@@ -79,9 +79,8 @@ public:
        bool attachToPrimitive = true);
 
   /**
-  * @brief 
-  * @bug
-  * @param[in] 
+  * @brief Calculate point that are located on each side of the primitive (assuming 
+  * the primitive is a cube)
   */
   void
   calculatePoints();
@@ -102,6 +101,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool
   setColor(FColor color);
+
+	UFUNCTION(BlueprintCallable)
+  FColor
+  getColor()const;
 
   /**
   * @returns The height of the primitive 
@@ -204,6 +207,12 @@ private:
   FIntVector m_id;
 
   /**
+  * @brief Keeps track of how many times the primitive was rotated per
+  * each individual axis.
+  */
+  FIntVector m_rotationsRecord;
+
+  /**
   * @brief Defines a point directlly in front of the primitive
   */
   FVector m_frontPoint;
@@ -233,6 +242,7 @@ private:
   * @brief Defines a point directlly in front of the primitive
   */
   FVector m_upPoint;
+
 protected:
 	UPROPERTY(VisibleAnywhere)
 	PrimitiveShape m_selectedShape;
@@ -256,5 +266,9 @@ protected:
   * @brief A pointer to a pyramid quad mesh. 
   */
   static ConstructorHelpers::FObjectFinder<UStaticMesh>* s_pyramidQuadMesh;
+public:
+
+	UPROPERTY(VisibleAnywhere)
+  FColor m_color;
 };
 

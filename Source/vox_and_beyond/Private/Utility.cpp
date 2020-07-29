@@ -6,15 +6,20 @@
 #include "basePrimitive.h"
 #include "Misc/FileHelper.h"
 #include "Internationalization/Regex.h"
-#include "DesktopPlatform/Public/IDesktopPlatform.h"
-#include "HAL/PlatformFilemanager.h"
+//#include "DesktopPlatform/Public/IDesktopPlatform.h"
+//#include "HAL/PlatformFilemanager.h"
 
-#include <cassert>
+//#include <cassert>
 
 bool
 UUtility::saveGridData(AGrid3D* const ptr_grid,
                        FString fileName)
 {
+  if(fileName.IsEmpty() )
+  {
+    fileName += TEXT("Default.txt");
+  }
+
   FString const fullDefaultPathForProject = getSaveDirectory();
 
   FString const fullPath = fullDefaultPathForProject + fileName;
@@ -35,15 +40,24 @@ UUtility::saveGridData(AGrid3D* const ptr_grid,
     for( auto& ptrPrimitive : ptr_grid->m_primitives )
     {
       auto const ID = ptrPrimitive->getId();
+      const FColor primitiveColor = ptrPrimitive->getColor();
       Result.AppendInt(ID.X);
       Result.AppendChar(TEXT(' '));
       Result.AppendInt(ID.Y);
       Result.AppendChar(TEXT(' '));
       Result.AppendInt(ID.Z);
+      Result.AppendChar(TEXT(' '));
+
+      Result.AppendInt(primitiveColor.R);
+      Result.AppendChar(TEXT(' '));
+      Result.AppendInt(primitiveColor.G);
+      Result.AppendChar(TEXT(' '));
+      Result.AppendInt(primitiveColor.B);
+      Result.AppendChar(TEXT(' '));
+      Result.AppendInt(primitiveColor.A);
       Result.AppendChar(TEXT(','));
       Result.AppendChar(TEXT(' '));
     }
-
     Result.AppendChar(TEXT(';'));
 
     return FFileHelper::SaveStringToFile(Result, *fullPath);
@@ -60,9 +74,13 @@ bool
 UUtility::loadGridData(AGrid3D* const ptr_grid,
                        FString fileName)
 {
+  if(fileName.IsEmpty() )
+  {
+    fileName += TEXT("Default.txt");
+  }
   const FString saveDirectory = getSaveDirectory();
 
-  FString const fullPath = saveDirectory + fileName;
+  const FString fullPath = saveDirectory + fileName;
 
   FText errorText;
   bool const isPathUsable = FFileHelper::IsFilenameValidForSaving(fullPath, errorText);
@@ -76,11 +94,7 @@ UUtility::loadGridData(AGrid3D* const ptr_grid,
   bool const isLoaded = FFileHelper::LoadFileToString(fileData, *fullPath, FFileHelper::EHashOptions::None, 0);
   if( isLoaded && isPathUsable )
   {
-    const FString unParsedPositionData = loadPositionData(fileData);
-
-    GridData gridData;
-
-    gridData.m_vectorIds = parsePositionData(unParsedPositionData);
+    const GridData gridData(parseData(fileData));
 
     ptr_grid->createGridFromData(gridData);
   }
@@ -93,31 +107,27 @@ UUtility::parsePositionData(const FString& data)
 {
   TArray<FIntVector> result;
 
-  FRegexPattern const intVectorPattern(TEXT("(,?[0-9]+ [0-9]+ [0-9]+)"));
+  FRegexPattern const intVectorPattern(TEXT("(,?\\d+ \\d+ \\d+)"));
   FRegexMatcher integerVectorMatches(intVectorPattern, data);
-
   {
 
-    FRegexPattern const individualDigit(TEXT("([0-9]+)"));
+    FRegexPattern const individualDigit(TEXT("(\\d+)"));
 
-    FIntVector intermediateVector(0,0,0);
+    FIntVector intermediateVector(0, 0, 0);
 
-    int32 currentIndex = 0;
-    currentIndex = integerVectorMatches.GetBeginLimit();
-    int32 const LastIndex =  integerVectorMatches.GetEndLimit();
-    while( currentIndex < LastIndex )
+    while( true )
     {
       integerVectorMatches.FindNext();
       const auto startIndex = integerVectorMatches.GetMatchBeginning();
       const auto endIndex = integerVectorMatches.GetMatchEnding();
-      if( -1 == startIndex || -1 == endIndex)
+      if( -1 == startIndex || -1 == endIndex )
       {
         break;
       }
 
       const FString subString = createSubString(startIndex, endIndex, data);
       FRegexMatcher individualDigitMatch(individualDigit, subString);
-      for(int32 i = 0; i < 3; ++i )
+      for( int32 i = 0; i < 3; ++i )
       {
         individualDigitMatch.FindNext();
         const auto valueInString = createSubString(individualDigitMatch.GetMatchBeginning(),
@@ -128,12 +138,77 @@ UUtility::parsePositionData(const FString& data)
         intermediateVector[i] = outVal;
       }
       result.Add(intermediateVector);
-      ++currentIndex;
-    } 
+    }
   }
 
   return  result;
 }
+
+TArray<GridDataElement>
+UUtility::parseData(const FString& dataSource)
+{
+  TArray<GridDataElement> result;
+
+  constexpr const TCHAR* Pattern = TEXT("(,?\\d+ \\d+ \\d+ \\d+ \\d+ \\d+ \\d+)");
+  const FString regexString = FString(Pattern);
+
+  FRegexPattern const gridDataPattern(regexString);
+  FRegexMatcher integerVectorMatches(gridDataPattern, dataSource);
+  {
+    FRegexPattern const individualDigit(TEXT("(\\d+)"));
+
+    GridDataElement intermediateGridData;
+
+    while( true )
+    {
+      integerVectorMatches.FindNext();
+      const auto startIndex = integerVectorMatches.GetMatchBeginning();
+      const auto endIndex = integerVectorMatches.GetMatchEnding();
+      if( -1 == startIndex || -1 == endIndex )
+      {
+        break;
+      }
+
+      const FString subString = createSubString(startIndex, endIndex, dataSource);
+      FRegexMatcher individualDigitMatch(individualDigit, subString);
+
+
+      FIntVector& intermediateVector = intermediateGridData.ID;
+      for( int32 i = 0; i < 3; ++i )
+      {
+        individualDigitMatch.FindNext();
+        const auto valueInString = createSubString(individualDigitMatch.GetMatchBeginning(),
+                                                   individualDigitMatch.GetMatchEnding(),
+                                                   subString);
+        int32 outVal;
+        LexFromString(outVal, *valueInString);
+        intermediateVector[i] = outVal;
+      }
+
+      FIntVector4 tempForColor(0,0,0,0);
+      for(int32 i = 0; i < 3; ++i )
+      {
+        individualDigitMatch.FindNext();
+        const auto valueInString = createSubString(individualDigitMatch.GetMatchBeginning(),
+                                                   individualDigitMatch.GetMatchEnding(),
+                                                   subString);
+        int32 outVal;
+        LexFromString(outVal, *valueInString);
+        tempForColor[i] = outVal;
+      }
+      intermediateGridData.color.R = tempForColor.X;
+      intermediateGridData.color.G = tempForColor.Y;
+      intermediateGridData.color.B = tempForColor.Z;
+      intermediateGridData.color.A = tempForColor.W;
+
+      result.Add(intermediateGridData);
+    }
+  }
+
+
+  return result;
+}
+
 
 FString
 UUtility::loadPositionData(const FString& data)
@@ -144,8 +219,9 @@ UUtility::loadPositionData(const FString& data)
   const int32 positionDataEndIndex = data.Find(TEXT(";"), ESearchCase::IgnoreCase,
                                                ESearchDir::FromStart, positionDataBeginIndex);
 
-  return createSubString(positionDataBeginIndex, positionDataEndIndex, data); 
+  return createSubString(positionDataBeginIndex, positionDataEndIndex, data);
 }
+
 
 FString
 UUtility::getSaveDirectory()
@@ -153,7 +229,7 @@ UUtility::getSaveDirectory()
   return FPaths::ConvertRelativePathToFull(FPaths::GameUserDeveloperDir());
 }
 
-FString 
+FString
 UUtility::createSubString(const int32 startPosition,
                           const int32 endPosition,
                           const FString& originalString)
@@ -166,12 +242,32 @@ UUtility::createSubString(const int32 startPosition,
   FString result;
   result.Reserve(endPosition - startPosition);
 
-  for(int32 i = startPosition; i <= endPosition; ++i )
+  for( int32 i = startPosition; i <= endPosition; ++i )
   {
     result.AppendChar(originalString[i]);
   }
 
   return result;
+}
+
+FStringView
+UUtility::createSubStringView(const int32 startPosition,
+                              const int32 endPosition,
+                              const FString& originalString)
+
+{
+  checkf(startPosition < endPosition,
+         TEXT("startPosition = %d must be smaller than endPosition = %d"),
+         startPosition,
+         endPosition);
+
+  const TCHAR* strPtr = *originalString;
+
+  strPtr += startPosition;
+
+  const int32 totalElements = endPosition - startPosition;
+
+  return  FStringView(strPtr, totalElements);
 }
 
 bool

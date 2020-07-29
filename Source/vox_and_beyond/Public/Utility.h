@@ -9,6 +9,7 @@
 
 
 
+struct GridDataElement;
 class AGrid3D;
 class AbasePrimitive;
 
@@ -50,6 +51,14 @@ private:
   static TArray<FIntVector>
   parsePositionData(const FString& data);
 
+
+  static TArray<GridDataElement>
+  parseData(const FString& dataSource);
+  
+  //template<class Type>
+  //static TArray<Type>
+  //parseTData(const FString& data,const int32 digitsToParse = 3);
+
   /**
   * @returns The string with the relevant data.
   * @param[in] data : contains the relevant data.
@@ -70,13 +79,23 @@ public:
   * @brief : creates a copy of a FString given a range.
   * @param[in] startPosition : The position to start from.
   * @param[in] endPosition : The position to start from.
-  * @param[in] originalString : 
+  * @param[in] originalString : The string that being copied from. 
   */
   static FString
   createSubString(const int32 startPosition,
                   const int32 endPosition,
                   const FString& originalString);
 
+  /**
+  * @brief : creates a string-view from a string.
+  * @param[in] startPosition : The position to start from.
+  * @param[in] endPosition : The position to start from.
+  * @param[in] originalString : The string that being copied from. 
+  */
+  static FStringView
+  createSubStringView(const int32 startPosition,
+                      const int32 endPosition,
+                      const FString& originalString);
 
   /**
   * @returns true when all the character of the string are numbers.

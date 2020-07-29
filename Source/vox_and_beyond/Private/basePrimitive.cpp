@@ -19,6 +19,7 @@ AbasePrimitive::AbasePrimitive()
   m_pMesh(nullptr),
   m_pMaterialDynamic(nullptr),
   m_id(FIntVector(std::numeric_limits<int32>::min(), std::numeric_limits<int32>::min(), std::numeric_limits<int32>::min())),
+  m_rotationsRecord(0, 0, 0),
   m_frontPoint(FVector::ZeroVector),
   m_backPoint(FVector::ZeroVector),
   m_rightPoint(FVector::ZeroVector),
@@ -340,6 +341,7 @@ AbasePrimitive::setShape(PrimitiveShape shape)
 bool
 AbasePrimitive::setColor(FColor color)
 {
+  m_color = color;
 
   if( m_pMaterialDynamic != nullptr )
   {
@@ -348,6 +350,12 @@ AbasePrimitive::setColor(FColor color)
   }
 
   return false;
+}
+
+FColor 
+AbasePrimitive::getColor() const
+{
+  return m_color; 
 }
 
 float
@@ -400,6 +408,8 @@ AbasePrimitive::rotatePrimitive(int32 horizontalRotations,
                                 int32 zAxisRotation)
 {
   constexpr static int32 rotationStep = 90;
+
+  
 
   FRotator const resultRotator(verticalRotations * rotationStep,
                                horizontalRotations * rotationStep,

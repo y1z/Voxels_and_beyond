@@ -173,37 +173,38 @@ AGrid3D::loadDataFromFile(FString fileName)
   return UUtility::loadGridData(this, fileName);
 }
 
-void 
-AGrid3D::createGridFromData(GridData& data)
+void
+AGrid3D::createGridFromData(const GridData& data)
 {
-  createPrimitivesByRelativePosition(data.m_vectorIds);
-  
+   // TODO : REMOVE 'createPrimitivesByRelativePosition' and 'colorPrimitives'
+  buildGridFromData(data);
+
 }
 
-void 
-AGrid3D::createPrimitivesByRelativePosition(const TArray<FIntVector>& Positions)
+void
+AGrid3D::buildGridFromData(const GridData& data)
 {
+
   FActorSpawnParameters spawnParam = this->spawnParameters();
-   
-  for (const FIntVector& Element : Positions)
+  UWorld* const worldPtr = GetWorld();
+  for( auto& element : data.m_element )
   {
-    const FVector locationInGrid = calculatePositionInGrid(Element);
+    const FVector locationInGrid = calculatePositionInGrid(element.ID);
 
-    AbasePrimitive* primitiveToGoInGrid = GetWorld()->SpawnActor<AbasePrimitive>(spawnParam);
-    primitiveToGoInGrid->init(Element, locationInGrid);
+    AbasePrimitive* primitiveToGoInGrid = worldPtr->SpawnActor<AbasePrimitive>(spawnParam);
+    primitiveToGoInGrid->init(element.ID, locationInGrid);
 
-    primitiveToGoInGrid->setColor(FColor(255 * 0.60, 255 * 0.60, 255 * 0.60f, 255));
+    primitiveToGoInGrid->setColor(element.color);
     primitiveToGoInGrid->setShape(PrimitiveShape::cube);
 
     m_primitives.Add(primitiveToGoInGrid);
-
   }
 
   m_primitives.Sort();
 
 }
 
-FVector 
+FVector
 AGrid3D::calculatePositionInGrid(const FIntVector relativePosition) const
 {
   FVector const InGridPosition = FVector((m_deltaWidth * relativePosition.X),

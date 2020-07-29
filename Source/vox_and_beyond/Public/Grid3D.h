@@ -9,12 +9,23 @@
 
 #include "Grid3D.generated.h"
 
+struct GridDataElement
+{
+  FIntVector ID;
+  FIntVector rotationAmount;
+  FColor color;
+  PrimitiveShape shape;
+};
+
 struct GridData
 {
-  TArray <FIntVector> m_vectorIds;
-  TArray <FRotator> m_rotations;
-  TArray <FColor> m_colors;
-  TArray<PrimitiveShape> m_shapes;
+  GridData() = default;
+  GridData(const TArray<GridDataElement>& elements)
+    :m_element(elements) {};
+
+  ~GridData() = default;
+
+  TArray <GridDataElement> m_element;
 };
 
 UCLASS(Blueprintable)
@@ -84,16 +95,18 @@ public:
   * @brief Uses the GridData to create a series of primitives.
   */
   void
-  createGridFromData(GridData &data);
+  createGridFromData(const GridData &data);
 
 private:
 
-
   /**
-  * @brief create a series of primitives using there relative position in the grid.
+  * @brief Is where all the work happens in terms of building
+  * the Grid
   */
   void
-  createPrimitivesByRelativePosition(const TArray<FIntVector>& Positions );
+  buildGridFromData(const GridData &data);
+
+
 
   FVector
   calculatePositionInGrid(const FIntVector relativePosition) const;
