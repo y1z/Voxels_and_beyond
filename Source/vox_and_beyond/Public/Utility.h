@@ -44,21 +44,23 @@ public:
 
 private:
 
+
+  /**
+  * @brief parses the data from a string and returns it from a TArray
+  * @param[in] data : contains the data for positions in the grid
+  */
+  static TArray<GridDataElement>
+  parseData(const FString& dataSource);
+
   /**
   * @brief parses and puts the data .
   * @param[in] data : contains the data for positions in the grid
   */
-  static TArray<FIntVector>
-  parsePositionData(const FString& data);
-
-
-  static TArray<GridDataElement>
-  parseData(const FString& dataSource);
+  static FIntVector4
+  parseDigitsInRegex(FRegexMatcher& matcher,
+                     const FString& dataSource,
+                     const bool threeDigits = true);
   
-  //template<class Type>
-  //static TArray<Type>
-  //parseTData(const FString& data,const int32 digitsToParse = 3);
-
   /**
   * @returns The string with the relevant data.
   * @param[in] data : contains the relevant data.
@@ -101,5 +103,5 @@ public:
   * @returns true when all the character of the string are numbers.
   */
   static bool 
-  isNumber(const TCHAR *Tstring);
+  isNumber(const TCHAR *TString);
 };

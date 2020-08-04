@@ -15,7 +15,7 @@ bool
 UUtility::saveGridData(AGrid3D* const ptr_grid,
                        FString fileName)
 {
-  if(fileName.IsEmpty() )
+  if( fileName.IsEmpty() )
   {
     fileName += TEXT("Default.txt");
   }
@@ -74,7 +74,7 @@ bool
 UUtility::loadGridData(AGrid3D* const ptr_grid,
                        FString fileName)
 {
-  if(fileName.IsEmpty() )
+  if( fileName.IsEmpty() )
   {
     fileName += TEXT("Default.txt");
   }
@@ -102,60 +102,18 @@ UUtility::loadGridData(AGrid3D* const ptr_grid,
   return isLoaded;
 }
 
-TArray<FIntVector>
-UUtility::parsePositionData(const FString& data)
-{
-  TArray<FIntVector> result;
-
-  FRegexPattern const intVectorPattern(TEXT("(,?\\d+ \\d+ \\d+)"));
-  FRegexMatcher integerVectorMatches(intVectorPattern, data);
-  {
-
-    FRegexPattern const individualDigit(TEXT("(\\d+)"));
-
-    FIntVector intermediateVector(0, 0, 0);
-
-    while( true )
-    {
-      integerVectorMatches.FindNext();
-      const auto startIndex = integerVectorMatches.GetMatchBeginning();
-      const auto endIndex = integerVectorMatches.GetMatchEnding();
-      if( -1 == startIndex || -1 == endIndex )
-      {
-        break;
-      }
-
-      const FString subString = createSubString(startIndex, endIndex, data);
-      FRegexMatcher individualDigitMatch(individualDigit, subString);
-      for( int32 i = 0; i < 3; ++i )
-      {
-        individualDigitMatch.FindNext();
-        const auto valueInString = createSubString(individualDigitMatch.GetMatchBeginning(),
-                                                   individualDigitMatch.GetMatchEnding(),
-                                                   subString);
-        int32 outVal;
-        LexFromString(outVal, *valueInString);
-        intermediateVector[i] = outVal;
-      }
-      result.Add(intermediateVector);
-    }
-  }
-
-  return  result;
-}
-
 TArray<GridDataElement>
 UUtility::parseData(const FString& dataSource)
 {
   TArray<GridDataElement> result;
 
-  constexpr const TCHAR* Pattern = TEXT("(,?\\d+ \\d+ \\d+ \\d+ \\d+ \\d+ \\d+)");
+  constexpr const TCHAR* Pattern = TEXT("(,?-?\\d+ -?\\d+ -?\\d+ -?\\d+ -?\\d+ -?\\d+ -?\\d+)");
   const FString regexString = FString(Pattern);
 
   FRegexPattern const gridDataPattern(regexString);
   FRegexMatcher integerVectorMatches(gridDataPattern, dataSource);
   {
-    FRegexPattern const individualDigit(TEXT("(\\d+)"));
+    FRegexPattern const individualDigit(TEXT("(-?\\d+)"));
 
     GridDataElement intermediateGridData;
 
@@ -172,40 +130,51 @@ UUtility::parseData(const FString& dataSource)
       const FString subString = createSubString(startIndex, endIndex, dataSource);
       FRegexMatcher individualDigitMatch(individualDigit, subString);
 
+      const FIntVector4 positionData = parseDigitsInRegex(individualDigitMatch,
+                                                          subString,
+                                                          true);
 
-      FIntVector& intermediateVector = intermediateGridData.ID;
-      for( int32 i = 0; i < 3; ++i )
-      {
-        individualDigitMatch.FindNext();
-        const auto valueInString = createSubString(individualDigitMatch.GetMatchBeginning(),
-                                                   individualDigitMatch.GetMatchEnding(),
-                                                   subString);
-        int32 outVal;
-        LexFromString(outVal, *valueInString);
-        intermediateVector[i] = outVal;
-      }
+      intermediateGridData.ID.X = positionData.X;
+      intermediateGridData.ID.Y = positionData.Y;
+      intermediateGridData.ID.Z = positionData.Z;
 
-      FIntVector4 tempForColor(0,0,0,0);
-      for(int32 i = 0; i < 3; ++i )
-      {
-        individualDigitMatch.FindNext();
-        const auto valueInString = createSubString(individualDigitMatch.GetMatchBeginning(),
-                                                   individualDigitMatch.GetMatchEnding(),
-                                                   subString);
-        int32 outVal;
-        LexFromString(outVal, *valueInString);
-        tempForColor[i] = outVal;
-      }
-      intermediateGridData.color.R = tempForColor.X;
-      intermediateGridData.color.G = tempForColor.Y;
-      intermediateGridData.color.B = tempForColor.Z;
-      intermediateGridData.color.A = tempForColor.W;
+      const FIntVector4 colorData = parseDigitsInRegex(individualDigitMatch,
+                                                       subString,
+                                                       false);
+
+      intermediateGridData.color.R = colorData.X;
+      intermediateGridData.color.G = colorData.Y;
+      intermediateGridData.color.B = colorData.Z;
+      intermediateGridData.color.A = colorData.W;
 
       result.Add(intermediateGridData);
     }
   }
 
 
+  return result;
+}
+
+FIntVector4
+UUtility::parseDigitsInRegex(FRegexMatcher& matcher,
+                             const FString& dataSource,
+                             const bool threeDigits)
+{
+
+  FIntVector4 result(EForceInit::ForceInit);
+  const int32 limit = (threeDigits) ? 3 : 4;
+
+  for( int32 i = 0; i < limit; ++i )
+  {
+    matcher.FindNext();
+
+    const FStringView valueInString = createSubStringView(matcher.GetMatchBeginning(),
+                                                          matcher.GetMatchEnding(),
+                                                          dataSource);
+    int32 outVal;
+    LexFromString(outVal, valueInString.GetData());
+    result[i] = outVal;
+  }
   return result;
 }
 
