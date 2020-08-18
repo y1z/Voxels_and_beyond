@@ -203,23 +203,23 @@ AbasePrimitive::calculatePosition(FVector point) const
 
   struct VecAndPoint
   {
-    FVector vector;
-    Point point;
+    FVector pointInPrimitive;
+    FIntVector directionOfPoin;
   };
 
   std::vector<std::pair<VecAndPoint, float >> vectorsAndDistances;
 
-  vectorsAndDistances.push_back({ {m_frontPoint, Point::front },0.0 });
-  vectorsAndDistances.push_back({ {m_backPoint, Point::back } ,0.0 });
-  vectorsAndDistances.push_back({ {m_upPoint,Point::up},0.0 });
-  vectorsAndDistances.push_back({ {m_downPoint,Point::down},0.0 });
-  vectorsAndDistances.push_back({ {m_rightPoint,Point::right},0.0 });
-  vectorsAndDistances.push_back({ {m_leftPoint,Point::left},0.0 });
+  vectorsAndDistances.push_back({ {m_frontPoint, FIntVector(0, 1, 0) },0.0f });
+  vectorsAndDistances.push_back({ {m_backPoint, FIntVector(0, -1, 0) } ,0.0f });
+  vectorsAndDistances.push_back({ {m_upPoint, FIntVector(0, 0, 1) }, 0.0f });
+  vectorsAndDistances.push_back({ {m_downPoint, FIntVector(0, 0, -1) }, 0.0f });
+  vectorsAndDistances.push_back({ {m_rightPoint, FIntVector(1, 0, 0)}, 0.0f });
+  vectorsAndDistances.push_back({ {m_leftPoint, FIntVector(-1, 0, 0)},0.0f });
 
 
   for( auto& vecs : vectorsAndDistances )
   {
-    vecs.second = (point - vecs.first.vector).SizeSquared();
+    vecs.second = (point - vecs.first.pointInPrimitive).SizeSquared();
   }
 
   VecAndPoint shortestVector; //shortest
@@ -234,37 +234,7 @@ AbasePrimitive::calculatePosition(FVector point) const
   }
 
   FIntVector result(0, 0, 0);
-  switch( shortestVector.point )
-  {
-    case Point::back:
-
-    result.Y = -1;
-    break;
-    case Point::front:
-
-    result.Y = 1;
-    break;
-    case Point::up:
-
-    result.Z = 1;
-    break;
-    case Point::down:
-
-    result.Z = -1;
-    break;
-    case Point::right:
-
-    result.X = 1;
-    break;
-    case Point::left:
-
-    result.X = -1;
-    break;
-    default:;
-  };
-
-
-  return  result;
+  return  shortestVector.directionOfPoin;
 }
 
 
