@@ -161,9 +161,78 @@ AGrid3D::resizeGrid(FIntVector newGridSize)
 }
 
 FIntVector
-AGrid3D::getGridSizePerAxis() const
+AGrid3D::getRelativeGridSizePerAxis() const
 {
   return FIntVector(m_width, m_depth, m_height);
+}
+
+FVector 
+AGrid3D::getAbsoluteGridSizePerAxis() const
+{
+  return FVector(getWidth(), getDepth(), getHeight());
+}
+
+FVector
+AGrid3D::getCenterRelativeToWorld() const
+{
+  return FVector(( m_topLeftPosition )+((m_bottomRightPosition - m_topLeftPosition) * 0.5f));
+}
+
+FVector 
+AGrid3D::getCenterRelativeToItSelf() const
+{
+  return FVector(m_deltaWidth, m_deltaHeight, m_deltaDepth) * 0.5f;
+}
+
+FVector 
+AGrid3D::getCenterXY() const
+{
+  FVector result = getCenterRelativeToWorld();
+  result.Z = m_bottomRightPosition.Z;
+
+  return  result;
+}
+
+float 
+AGrid3D::getHeight() const
+{
+  return std::fabsf(m_topLeftPosition.Z - m_bottomRightPosition.Z);
+}
+
+float 
+AGrid3D::getWidth() const
+{
+  return std::fabsf(m_topLeftPosition.X - m_bottomRightPosition.X);
+}
+
+float 
+AGrid3D::getDepth() const
+{
+  return std::fabsf(m_topLeftPosition.Y - m_bottomRightPosition.Y);
+}
+
+FVector
+AGrid3D::getTopPoint() const
+{
+  return getCenterRelativeToWorld() + FVector(0.0f, 0.0f, getHeight() * 0.5f);
+}
+
+FVector 
+AGrid3D::getLeftPoint() const
+{
+  return getCenterRelativeToWorld() + FVector(getWidth() * -0.5f, 0.0f, 0.0f);
+}
+
+FVector 
+AGrid3D::getRightPoint() const
+{
+  return getCenterRelativeToWorld() + FVector(getWidth() * 0.5f, 0.0f, 0.0f);
+}
+
+FVector 
+AGrid3D::getBottomPoint() const
+{
+  return getCenterRelativeToWorld() + FVector(0.0f, 0.0f, getHeight() * -0.5f);
 }
 
 bool
@@ -176,9 +245,7 @@ AGrid3D::loadDataFromFile(FString fileName)
 void
 AGrid3D::createGridFromData(const GridData& data)
 {
-   // TODO : REMOVE 'createPrimitivesByRelativePosition' and 'colorPrimitives'
   buildGridFromData(data);
-
 }
 
 void

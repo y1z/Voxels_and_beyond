@@ -102,6 +102,9 @@ public:
 	bool
   setColor(FColor color);
 
+  /**
+  * @returns The current color of the primitive.
+  */
 	UFUNCTION(BlueprintCallable)
   FColor
   getColor()const;
@@ -152,13 +155,16 @@ public:
 
 	UFUNCTION(BlueprintCallable)
   void 
-  rotatePrimitive(int32 horizontalRotations, int32 verticalRotations = 0 , int32 zAxisRotation = 0);
+  rotatePrimitive(int32 horizontalRotations,
+                  int32 verticalRotations = 0,
+                  int32 zAxisRotation = 0);
 
   /**
   * @returns The Id of the Primitive
   */
 	UFUNCTION(BlueprintCallable)
-  FIntVector getId()const;
+  FIntVector 
+  getId()const;
 
 
 private:

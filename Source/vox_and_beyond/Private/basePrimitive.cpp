@@ -31,16 +31,16 @@ AbasePrimitive::AbasePrimitive()
   m_pMesh->SetupAttachment(RootComponent);
 
   static ConstructorHelpers::FObjectFinder<UStaticMesh>
-  CubeVisual(TEXT("/Game/StarterContent/Shapes/Shape_Cube.Shape_Cube"));
+    CubeVisual(TEXT("/Game/StarterContent/Shapes/Shape_Cube.Shape_Cube"));
 
   static ConstructorHelpers::FObjectFinder<UStaticMesh>
-  SphereVisual(TEXT("/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere"));
+    SphereVisual(TEXT("/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere"));
 
   static ConstructorHelpers::FObjectFinder<UStaticMesh>
-  PyramidVisual(TEXT("/Game/StarterContent/Shapes/Shape_TriPyramid.Shape_TriPyramid"));
+    PyramidVisual(TEXT("/Game/StarterContent/Shapes/Shape_TriPyramid.Shape_TriPyramid"));
 
   static ConstructorHelpers::FObjectFinder<UStaticMesh>
-  PyramidQuadVisual(TEXT("/Game/StarterContent/Shapes/Shape_QuadPyramid.Shape_QuadPyramid"));
+    PyramidQuadVisual(TEXT("/Game/StarterContent/Shapes/Shape_QuadPyramid.Shape_QuadPyramid"));
 
 
   s_cubeMesh = &CubeVisual;
@@ -151,14 +151,14 @@ AbasePrimitive::init(FIntVector const PrimitiveID,
     FVector newLocationVector;
 
     if( nullptr != primitive )
-     newLocationVector = primitive->m_pMesh->GetRelativeLocation();
+      newLocationVector = primitive->m_pMesh->GetRelativeLocation();
     else
     {
       newLocationVector = Location;
     }
 
     FVector const conversionVector(relativeVector.X, relativeVector.Y, relativeVector.Z);
-    
+
     FVector const sizePerAxis(getWidth(), getDepth(), getHeight());
 
     newLocationVector += (sizePerAxis * conversionVector);
@@ -174,11 +174,11 @@ AbasePrimitive::init(FIntVector const PrimitiveID,
 }
 
 
-void 
+void
 AbasePrimitive::calculatePoints()
 {
   auto const box = m_pMesh->CalcBounds(m_pMesh->GetRelativeTransform()).GetBox();
- 
+
   FVector const center = box.GetCenter();// (box.Max - box.Min) * 0.5f;
 
   float const ZDelta = std::fabsf(box.Max.Z - box.Min.Z) * 0.5f;
@@ -195,18 +195,19 @@ AbasePrimitive::calculatePoints()
   m_leftPoint = m_rightPoint + FVector((-2.0f * XDelta), 0.0f, 0.0f);
 }
 
-FIntVector 
+FIntVector
 AbasePrimitive::calculatePosition(FVector point) const
 {
-  enum class Point { back,front,up,down,right,left };
+  /// Fun fact enum class can also be enum struct.
+  enum struct Point { back, front, up, down, right, left };
 
-  struct VecAndPoint 
+  struct VecAndPoint
   {
     FVector vector;
     Point point;
   };
 
-  std::vector<std::pair<VecAndPoint , float >> vectorsAndDistances;
+  std::vector<std::pair<VecAndPoint, float >> vectorsAndDistances;
 
   vectorsAndDistances.push_back({ {m_frontPoint, Point::front },0.0 });
   vectorsAndDistances.push_back({ {m_backPoint, Point::back } ,0.0 });
@@ -229,14 +230,11 @@ AbasePrimitive::calculatePosition(FVector point) const
     {
       smallest = vecs.second;
       shortestVector = vecs.first;
-
     }
-
-    
   }
 
-  FIntVector result(0,0,0);
-  switch (shortestVector.point) 
+  FIntVector result(0, 0, 0);
+  switch( shortestVector.point )
   {
     case Point::back:
 
@@ -250,15 +248,15 @@ AbasePrimitive::calculatePosition(FVector point) const
 
     result.Z = 1;
     break;
-    case Point::down: 
+    case Point::down:
 
     result.Z = -1;
     break;
-    case Point::right: 
+    case Point::right:
 
     result.X = 1;
     break;
-    case Point::left: 
+    case Point::left:
 
     result.X = -1;
     break;
@@ -266,7 +264,7 @@ AbasePrimitive::calculatePosition(FVector point) const
   };
 
 
- return  result;
+  return  result;
 }
 
 
@@ -352,10 +350,10 @@ AbasePrimitive::setColor(FColor color)
   return false;
 }
 
-FColor 
+FColor
 AbasePrimitive::getColor() const
 {
-  return m_color; 
+  return m_color;
 }
 
 float
@@ -386,7 +384,7 @@ AbasePrimitive::getDepth() const
 FVector
 AbasePrimitive::getAbsoluteCenter() const
 {
-  return m_pMesh->CalcBounds(m_pMesh->GetRelativeTransform()).GetBox().GetCenter(); 
+  return m_pMesh->CalcBounds(m_pMesh->GetRelativeTransform()).GetBox().GetCenter();
 }
 
 FVector
@@ -396,7 +394,7 @@ AbasePrimitive::getRelativeToSelfCenter() const
   return (Box.Max - Box.Min) * 0.5f;
 }
 
-FVector 
+FVector
 AbasePrimitive::getTopLeftCorner() const
 {
   return m_pMesh->CalcBounds(m_pMesh->GetRelativeTransform()).GetBox().Max;
@@ -409,7 +407,6 @@ AbasePrimitive::rotatePrimitive(int32 horizontalRotations,
 {
   constexpr static int32 rotationStep = 90;
 
-  
 
   FRotator const resultRotator(verticalRotations * rotationStep,
                                horizontalRotations * rotationStep,

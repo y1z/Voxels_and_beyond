@@ -82,7 +82,99 @@ public:
   */
 	UFUNCTION(BlueprintCallable)
   FIntVector 
-  getGridSizePerAxis()const;
+  getRelativeGridSizePerAxis()const;
+
+  /**
+  * @brief A representation of the size of each axis of the Grid.
+  * @returns A vector that contains how big each axis is .
+  * @bug no known bugs
+  */
+	UFUNCTION(BlueprintCallable)
+  FVector 
+  getAbsoluteGridSizePerAxis()const;
+
+  /**
+  * @returns The middle of the Grid in the xy axis.
+  * @bug no known bugs
+  */
+	UFUNCTION(BlueprintCallable)
+  FVector 
+  getCenterRelativeToWorld()const;
+
+  /**
+  * @returns The middle of the Grid in the xy axis.
+  * @bug no known bugs
+  */
+	UFUNCTION(BlueprintCallable)
+  FVector 
+  getCenterRelativeToItSelf()const;
+
+  /**
+  * @returns The middle of the Grid in the xy axis.
+  * @bug no known bugs
+  */
+	UFUNCTION(BlueprintCallable)
+  FVector 
+  getCenterXY()const;
+
+  /**
+  * @returns The height of the grid.
+  * @bug no known bugs
+  */
+	UFUNCTION(BlueprintCallable)
+  float
+  getHeight()const;
+
+
+  /**
+  * @returns The Width of the grid.
+  * @bug no known bugs
+  */
+	UFUNCTION(BlueprintCallable)
+  float
+  getWidth()const;
+
+
+  /**
+  * @returns The Depth of the grid.
+  * @bug no known bugs
+  */
+	UFUNCTION(BlueprintCallable)
+  float
+  getDepth()const;
+
+  /**
+  * @returns A point that indicates the top of the Grid.
+  * @bug no known bugs
+  */
+	UFUNCTION(BlueprintCallable)
+  FVector
+  getTopPoint()const;
+
+  /**
+  * @returns A point that indicates the "left" of the Grid.
+  * @bug no known bugs
+  */
+	UFUNCTION(BlueprintCallable)
+  FVector
+  getLeftPoint()const;
+
+  /**
+  * @returns A point that indicates the "Right" of the Grid.
+  * @bug no known bugs
+  */
+	UFUNCTION(BlueprintCallable)
+  FVector
+  getRightPoint()const;
+
+  /**
+  * @returns A point that indicates the bottom of the Grid.
+  * @bug no known bugs
+  */
+	UFUNCTION(BlueprintCallable)
+  FVector
+  getBottomPoint()const;
+
 public:
 
 
