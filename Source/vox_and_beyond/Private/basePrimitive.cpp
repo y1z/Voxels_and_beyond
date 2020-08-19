@@ -5,6 +5,7 @@
 #include <climits>
 #include <utility>
 #include <vector>
+#include <array>
 #include <algorithm>
 
 ConstructorHelpers::FObjectFinder<UStaticMesh>* AbasePrimitive::s_cubeMesh = nullptr;
@@ -198,33 +199,29 @@ AbasePrimitive::calculatePoints()
 FIntVector
 AbasePrimitive::calculatePosition(FVector point) const
 {
-  /// Fun fact enum class can also be enum struct.
-  enum struct Point { back, front, up, down, right, left };
-
-  struct VecAndPoint
+  struct VecAndDir
   {
     FVector pointInPrimitive;
-    FIntVector directionOfPoin;
+    FIntVector directionOfPoint;
   };
 
-  std::vector<std::pair<VecAndPoint, float >> vectorsAndDistances;
+  std::array<std::pair<VecAndDir, float>, 6>  VectorsAndDistances;
+  VectorsAndDistances[0] = std::pair<VecAndDir, float> {{m_frontPoint, FIntVector(0, 1, 0)},0.0f }; 
+  VectorsAndDistances[1] = std::pair<VecAndDir, float>{ {m_backPoint, FIntVector(0, -1, 0) } ,0.0f };
+  VectorsAndDistances[2] = std::pair<VecAndDir, float> { {m_upPoint, FIntVector(0, 0, 1) }, 0.0f };
+  VectorsAndDistances[3] = std::pair<VecAndDir, float> { {m_downPoint, FIntVector(0, 0, -1) }, 0.0f };
+  VectorsAndDistances[4] = std::pair<VecAndDir, float> { {m_rightPoint, FIntVector(1, 0, 0)}, 0.0f };
+  VectorsAndDistances[5] = std::pair<VecAndDir, float> { {m_leftPoint, FIntVector(-1, 0, 0)},0.0f };
 
-  vectorsAndDistances.push_back({ {m_frontPoint, FIntVector(0, 1, 0) },0.0f });
-  vectorsAndDistances.push_back({ {m_backPoint, FIntVector(0, -1, 0) } ,0.0f });
-  vectorsAndDistances.push_back({ {m_upPoint, FIntVector(0, 0, 1) }, 0.0f });
-  vectorsAndDistances.push_back({ {m_downPoint, FIntVector(0, 0, -1) }, 0.0f });
-  vectorsAndDistances.push_back({ {m_rightPoint, FIntVector(1, 0, 0)}, 0.0f });
-  vectorsAndDistances.push_back({ {m_leftPoint, FIntVector(-1, 0, 0)},0.0f });
 
-
-  for( auto& vecs : vectorsAndDistances )
+  for( auto& vecs : VectorsAndDistances )
   {
     vecs.second = (point - vecs.first.pointInPrimitive).SizeSquared();
   }
 
-  VecAndPoint shortestVector; //shortest
+  VecAndDir shortestVector;
   float smallest = std::numeric_limits<float>::max();
-  for( auto& vecs : vectorsAndDistances )
+  for( auto& vecs : VectorsAndDistances )
   {
     if( vecs.second < smallest )
     {
@@ -233,8 +230,7 @@ AbasePrimitive::calculatePosition(FVector point) const
     }
   }
 
-  FIntVector result(0, 0, 0);
-  return  shortestVector.directionOfPoin;
+  return  shortestVector.directionOfPoint;
 }
 
 
